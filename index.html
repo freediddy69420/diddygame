@@ -8,20 +8,63 @@
         body { background: #222; display: flex; flex-direction: column; align-items: center; }
         canvas { background: #fff; margin-top: 20px; }
         #score { color: #fff; font-size: 20px; margin-top: 10px; }
+        #mainWrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            width: 100%;
+        }
+        #sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-right: 240px; /* Moved another 60px further left */
+            min-width: 200px;
+        }
+        #leaderboard {
+            color: #fff;
+            font-size: 18px;
+            margin-top: 20px;
+            min-width: 180px;
+            background: rgba(40,40,40,0.9);
+            border-radius: 10px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
     </style>
 </head>
 <body>
+    <a href="https://github.com/Ashton20271/diddygame" target="_blank" id="githubBtn" style="
+        position: absolute;
+        top: 20px;
+        left: 30px;
+        background: none;
+        border: none;
+        z-index: 20;
+        cursor: pointer;
+        outline: none;
+    ">
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" style="width:32px;height:32px;border-radius:50%;background:none;">
+    </a>
     <h1 style="color:#fff;">Diddy Game</h1>
-    <div id="score">Score: 0</div>
-    <div id="highscore" style="color:#fff; font-size:18px; margin-top:5px;">High Score: 0</div>
-    <canvas id="game" width="400" height="400"></canvas>
+    <div id="mainWrapper">
+        <div id="sidebar">
+            <div id="score">Score: 0</div>
+            <div id="highscore" style="color:#fff; font-size:18px; margin-top:5px;">High Score: 0</div>
+            <div id="leaderboard">
+                <strong>Global Leaderboard</strong>
+                <ol id="leaderboardList"></ol>
+            </div>
+        </div>
+        <div>
+            <canvas id="game" width="400" height="400"></canvas>
+        </div>
+    </div>
     <div id="pauseMenu" style="display:none; position:absolute; top:50px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:30px 50px; border-radius:10px; font-size:24px; z-index:10; text-align:center;">
         <div>Paused</div>
         <div style="font-size:16px; margin-top:10px;">Press ESC to resume</div>
-    </div>
-    <div id="leaderboard" style="color:#fff; font-size:18px; margin-top:10px;">
-        <strong>Global Leaderboard</strong>
-        <ol id="leaderboardList"></ol>
     </div>
     <!-- <button id="playMusicBtn" style="margin-top:10px;">Play Music</button> -->
 
