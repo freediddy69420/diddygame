@@ -10,7 +10,10 @@
     <meta property="og:url" content="https://ashton20271.github.io/diddygame/" />
     <style>
         body { background: #222; display: flex; flex-direction: column; align-items: center; }
-        canvas { background: #fff; margin-top: 20px; }
+        canvas { 
+            background: #464646; /* matches leaderboard box in dark mode */
+            margin-top: 20px; 
+        }
         #score { color: #fff; font-size: 20px; margin-top: 10px; }
         #mainWrapper {
             display: flex;
@@ -320,6 +323,8 @@
                 document.getElementById('leaderboard').style.background = "rgba(70,70,70,0.9)"; // lighter shade of black
                 document.getElementById('leaderboard').style.color = "#fff";
                 document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#fff");
+                // Set canvas background to match leaderboard in dark mode
+                canvas.style.background = "#464646";
                 modeBtn.textContent = "🌑";
             } else {
                 document.body.style.background = "#f7f7f7";
@@ -329,6 +334,8 @@
                 document.getElementById('leaderboard').style.background = "rgba(255,255,255,0.9)";
                 document.getElementById('leaderboard').style.color = "#222";
                 document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#222");
+                // Keep canvas background as it was for light mode
+                canvas.style.background = "#fff";
                 modeBtn.textContent = "☀️";
             }
         };
