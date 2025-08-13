@@ -160,6 +160,16 @@
         }
         updateLeaderboard();
 
+        // Place child at random position, not on snake
+        function placeChild() {
+            let valid = false;
+            while (!valid) {
+                child.x = Math.floor(Math.random() * tileCount);
+                child.y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === child.x && segment.y === child.y);
+            }
+        }
+
         function gameLoop() {
             if (paused) return;
 
@@ -168,7 +178,7 @@
                 const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
                 snake.unshift(head);
 
-                // Check if chile touched
+                // Check if child touched
                 if (head.x === child.x && head.y === child.y) {
                     score++;
                     document.getElementById('score').textContent = "Score: " + score;
@@ -178,9 +188,8 @@
                         localStorage.setItem('diddyHighScore', highscore);
                         document.getElementById('highscore').textContent = "High Score: " + highscore;
                     }
-                    // Place child at random position
-                    child.x = Math.floor(Math.random() * tileCount);
-                    child.y = Math.floor(Math.random() * tileCount);
+                    // Place child at random position, not on snake
+                    placeChild();
                 } else {
                     snake.pop();
                 }
@@ -208,7 +217,8 @@
                     direction = {x: 0, y: 0};
                     score = 0;
                     document.getElementById('score').textContent = "Score: 0";
-                    child = {x: 5, y: 5};
+                    // Place child at random position, not on snake
+                    placeChild();
                 }
             }
 
@@ -280,6 +290,9 @@
             volumeBtn.textContent = "🔊";
             musicPlaying = true;
         };
+
+        // Replace initial child placement with function call
+        placeChild();
 
         setInterval(gameLoop, 100);
     </script>
