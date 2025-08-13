@@ -97,7 +97,7 @@
         right: 30px;
         background: none;
         border: none;
-        font-size: 32px;
+       
         color: #fff;
         cursor: pointer;
         z-index: 20;
@@ -118,6 +118,16 @@
         let direction = {x: 0, y: 0};
         let child = {x: 5, y: 5};
         let score = 0;
+        let powerup = null;
+        let powerupActive = false;
+        let invincibilityPowerup = null;
+        let invincible = false;
+        let invincibilityTimer = 0;
+        let speedPowerup = null;
+        let speedBoostActive = false;
+        let speedBoostTimer = 0;
+        let gameSpeed = 100; // default interval ms
+        let gameInterval;
 
         // Highscore feature
         let highscore = localStorage.getItem('diddyHighScore') ? parseInt(localStorage.getItem('diddyHighScore')) : 0;
@@ -188,6 +198,52 @@
             }
         }
 
+        // Place power-up at random position, not on snake or child
+        function placePowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y);
+                if (valid) powerup = {x, y};
+            }
+        }
+
+        // Place invincibility power-up at random position, not on snake or child
+        function placeInvincibilityPowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y);
+                if (valid) invincibilityPowerup = {x, y};
+            }
+        }
+
+        // Place speed power-up at random position, not on snake, child, or other powerups
+        function placeSpeedPowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y) &&
+                        !(invincibilityPowerup && invincibilityPowerup.x === x && invincibilityPowerup.y === y);
+                if (valid) speedPowerup = {x, y};
+            }
+        }
+
+        // Randomly decide to spawn a power-up after child is collected
+        function maybeSpawnPowerup() {
+            if (!powerup && Math.random() < 0.2) { // 20% chance
+                placePowerup();
+            }
+        }
+
         function gameLoop() {
             if (paused) return;
 
@@ -198,27 +254,113 @@
 
                 // Check if child touched
                 if (head.x === child.x && head.y === child.y) {
-                    score++;
+                    let points = 1;
+                    if (powerupActive) {
+                        points = 2;
+                        powerupActive = false;
+                    }
+                    score += points;
                     document.getElementById('score').textContent = "Score: " + score;
-                    // Update highscore if needed
                     if (score > highscore) {
                         highscore = score;
                         localStorage.setItem('diddyHighScore', highscore);
                         document.getElementById('highscore').textContent = "High Score: " + highscore;
                     }
-                    // Place child at random position, not on snake
                     placeChild();
+                    maybeSpawnPowerup();
+
+                    // Spawn speed powerup at score 25
+                    if (score === 25 && !speedPowerup) {
+                        placeSpeedPowerup();
+                    }
+                    // Spawn invincibility powerup at score 50
+                    if (score === 50 && !invincibilityPowerup) {
+                        placeInvincibilityPowerup();
+                    }
+                } else if (powerup && head.x === powerup.x && head.y === powerup.y) {
+                    powerupActive = true;
+                    powerup = null;
+                } else if (speedPowerup && head.x === speedPowerup.x && head.y === speedPowerup.y) {
+                    speedBoostActive = true;
+                    speedBoostTimer = 100; // lasts for 100 game ticks (~10 seconds)
+                    speedPowerup = null;
+                    setGameSpeed(gameSpeed / 2); // double speed
+                } else if (invincibilityPowerup && head.x === invincibilityPowerup.x && head.y === invincibilityPowerup.y) {
+                    invincible = true;
+                    invincibilityTimer = 100; // lasts for 100 game ticks (~10 seconds)
+                    invincibilityPowerup = null;
                 } else {
                     snake.pop();
                 }
 
                 // Check collision with walls or self
                 if (
-                    head.x < 0 || head.x >= tileCount ||
-                    head.y < 0 || head.y >= tileCount ||
-                    snake.slice(1).some(s => s.x === head.x && s.y === head.y)
+                    (head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount)
                 ) {
-                    // Game over
+                    if (invincible) {
+                        // If invincible, teleport to center instead of game over
+                        snake[0] = {x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)};
+                        direction = {x: 0, y: 0};
+                    } else if (snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
+                        // Game over on self collision if not invincible
+                        alert("Game Over! Final Score: " + score);
+
+                        // Submit score to global leaderboard
+                        if (score > 0) {
+                            db.ref('leaderboard').push({
+                                name: playerName,
+                                score: score,
+                                timestamp: Date.now()
+                            });
+                            setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                        }
+
+                        snake = [{x: 10, y: 10}];
+                        direction = {x: 0, y: 0};
+                        score = 0;
+                        document.getElementById('score').textContent = "Score: 0";
+                        placeChild();
+                        powerup = null;
+                        powerupActive = false;
+                        invincibilityPowerup = null;
+                        invincible = false;
+                        invincibilityTimer = 0;
+                        speedPowerup = null;
+                        speedBoostActive = false;
+                        speedBoostTimer = 0;
+                        setGameSpeed(100); // reset speed
+                    } else {
+                        // Game over on wall collision if not invincible
+                        alert("Game Over! Final Score: " + score);
+
+                        // Submit score to global leaderboard
+                        if (score > 0) {
+                            db.ref('leaderboard').push({
+                                name: playerName,
+                                score: score,
+                                timestamp: Date.now()
+                            });
+                            setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                        }
+
+                        snake = [{x: 10, y: 10}];
+                        direction = {x: 0, y: 0};
+                        score = 0;
+                        document.getElementById('score').textContent = "Score: 0";
+                        placeChild();
+                        powerup = null;
+                        powerupActive = false;
+                        invincibilityPowerup = null;
+                        invincible = false;
+                        invincibilityTimer = 0;
+                        speedPowerup = null;
+                        speedBoostActive = false;
+                        speedBoostTimer = 0;
+                        setGameSpeed(100); // reset speed
+                    }
+                } else if (!invincible && snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
+                    // Game over on self collision if not invincible
                     alert("Game Over! Final Score: " + score);
 
                     // Submit score to global leaderboard
@@ -235,8 +377,33 @@
                     direction = {x: 0, y: 0};
                     score = 0;
                     document.getElementById('score').textContent = "Score: 0";
-                    // Place child at random position, not on snake
                     placeChild();
+                    powerup = null;
+                    powerupActive = false;
+                    invincibilityPowerup = null;
+                    invincible = false;
+                    invincibilityTimer = 0;
+                    speedPowerup = null;
+                    speedBoostActive = false;
+                    speedBoostTimer = 0;
+                    setGameSpeed(100); // reset speed
+                }
+            }
+
+            // Handle invincibility timer
+            if (invincible) {
+                invincibilityTimer--;
+                if (invincibilityTimer <= 0) {
+                    invincible = false;
+                }
+            }
+
+            // Handle speed boost timer
+            if (speedBoostActive) {
+                speedBoostTimer--;
+                if (speedBoostTimer <= 0) {
+                    speedBoostActive = false;
+                    setGameSpeed(100); // reset to normal speed
                 }
             }
 
@@ -244,10 +411,39 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             // Draw child
             drawTile(child.x, child.y, childEmoji);
+            // Draw power-up
+            if (powerup) drawTile(powerup.x, powerup.y, "⭐");
+            // Draw speed power-up
+            if (speedPowerup) drawTile(speedPowerup.x, speedPowerup.y, "⚡");
+            // Draw invincibility power-up
+            if (invincibilityPowerup) drawTile(invincibilityPowerup.x, invincibilityPowerup.y, "🛡️");
             // Draw Diddy
             snake.forEach((segment, i) => {
                 drawTile(segment.x, segment.y, diddy);
             });
+            // Optionally, show a visual indicator for invincibility
+            if (invincible) {
+                ctx.save();
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = "#00ff00";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+            // Optionally, show a visual indicator for speed boost
+            if (speedBoostActive) {
+                ctx.save();
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = "#ffff00";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+        }
+
+        // Utility to change game speed
+        function setGameSpeed(ms) {
+            gameSpeed = ms;
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, gameSpeed);
         }
 
         document.addEventListener('keydown', e => {
@@ -343,7 +539,8 @@
         // Replace initial child placement with function call
         placeChild();
 
-        setInterval(gameLoop, 100);
+        // Start game loop with interval
+        gameInterval = setInterval(gameLoop, gameSpeed);
     </script>
 </body>
 
