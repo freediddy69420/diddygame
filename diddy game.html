@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diddy Game</title>
+    <style>
+        body { background: #222; display: flex; flex-direction: column; align-items: center; }
+        canvas { background: #fff; margin-top: 20px; }
+        #score { color: #fff; font-size: 20px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1 style="color:#fff;">Diddy Game</h1>
+    <div id="score">Score: 0</div>
+    <div id="highscore" style="color:#fff; font-size:18px; margin-top:5px;">High Score: 0</div>
+    <canvas id="game" width="400" height="400"></canvas>
+    <div id="pauseMenu" style="display:none; position:absolute; top:50px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:30px 50px; border-radius:10px; font-size:24px; z-index:10; text-align:center;">
+        <div>Paused</div>
+        <div style="font-size:16px; margin-top:10px;">Press ESC to resume</div>
+    </div>
+    <div id="leaderboard" style="color:#fff; font-size:18px; margin-top:10px;">
+        <strong>Global Leaderboard</strong>
+        <ol id="leaderboardList"></ol>
+    </div>
+    <!-- Add Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        let snake = [{x: 10, y: 10}];
+        let direction = {x: 0, y: 0};
+        let child = {x: 5, y: 5};
+        let score = 0;
+
+        // Highscore feature
+        let highscore = localStorage.getItem('diddyHighScore') ? parseInt(localStorage.getItem('diddyHighScore')) : 0;
+        document.getElementById('highscore').textContent = "High Score: " + highscore;
+
+        // Diddy and child representations
+        const diddy = "👨🏿";
+        const childEmoji = "👶🏻";
+
+        function drawTile(x, y, emoji) {
+            ctx.font = `${gridSize}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(emoji, x * gridSize + gridSize/2, y * gridSize + gridSize/2);
+        }
+
+        let paused = false;
+
+        function showPauseMenu(show) {
+            document.getElementById('pauseMenu').style.display = show ? 'block' : 'none';
+        }
+
+        // Firebase config (replace with your own from Firebase Console)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3dENKtpv4GlUr1NfiGOYFtJR-LfuSiaA",
+            authDomain: "diddygame-dfd89.firebaseapp.com",
+            databaseURL: "https://diddygame-dfd89-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "diddygame-dfd89",
+            storageBucket: "diddygame-dfd89.appspot.com",
+            messagingSenderId: "662132817791",
+            appId: "1:662132817791:web:7328705ae63440f01e244a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function updateLeaderboard() {
+            db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snapshot => {
+                const items = [];
+                snapshot.forEach(child => {
+                    items.push(child.val());
+                });
+                items.reverse(); // Highest score first
+                const list = document.getElementById('leaderboardList');
+                list.innerHTML = '';
+                items.forEach((entry, i) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${entry.name}: ${entry.score}`;
+                    list.appendChild(li);
+                });
+            });
+        }
+
+        // Prompt for player name
+        let playerName = localStorage.getItem('diddyPlayerName');
+        if (!playerName) {
+            playerName = prompt("Enter your name for the leaderboard:") || "Anonymous";
+            localStorage.setItem('diddyPlayerName', playerName);
+        }
+        updateLeaderboard();
+
+        function gameLoop() {
+            if (paused) return;
+
+            // Move diddy
+            if (direction.x !== 0 || direction.y !== 0) {
+                const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+                snake.unshift(head);
+
+                // Check if chile touched
+                if (head.x === child.x && head.y === child.y) {
+                    score++;
+                    document.getElementById('score').textContent = "Score: " + score;
+                    // Update highscore if needed
+                    if (score > highscore) {
+                        highscore = score;
+                        localStorage.setItem('diddyHighScore', highscore);
+                        document.getElementById('highscore').textContent = "High Score: " + highscore;
+                    }
+                    // Place child at random position
+                    child.x = Math.floor(Math.random() * tileCount);
+                    child.y = Math.floor(Math.random() * tileCount);
+                } else {
+                    snake.pop();
+                }
+
+                // Check collision with walls or self
+                if (
+                    head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount ||
+                    snake.slice(1).some(s => s.x === head.x && s.y === head.y)
+                ) {
+                    // Game over
+                    alert("Game Over! Final Score: " + score);
+
+                    // Submit score to global leaderboard
+                    if (score > 0) {
+                        db.ref('leaderboard').push({
+                            name: playerName,
+                            score: score,
+                            timestamp: Date.now()
+                        });
+                        setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                    }
+
+                    snake = [{x: 10, y: 10}];
+                    direction = {x: 0, y: 0};
+                    score = 0;
+                    document.getElementById('score').textContent = "Score: 0";
+                    child = {x: 5, y: 5};
+                }
+            }
+
+            // Draw everything
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw child
+            drawTile(child.x, child.y, childEmoji);
+            // Draw Diddy
+            snake.forEach((segment, i) => {
+                drawTile(segment.x, segment.y, diddy);
+            });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === "Escape") {
+                paused = !paused;
+                showPauseMenu(paused);
+            }
+            if (!paused) {
+                if (e.key === "ArrowUp" && direction.y !== 1) direction = {x: 0, y: -1};
+                else if (e.key === "ArrowDown" && direction.y !== -1) direction = {x: 0, y: 1};
+                else if (e.key === "ArrowLeft" && direction.x !== 1) direction = {x: -1, y: 0};
+                else if (e.key === "ArrowRight" && direction.x !== -1) direction = {x: 1, y: 0};
+            }
+        });
+
+        setInterval(gameLoop, 100);
+    </script>
+</body>
+</html>
