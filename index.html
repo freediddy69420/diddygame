@@ -23,6 +23,24 @@
         <strong>Global Leaderboard</strong>
         <ol id="leaderboardList"></ol>
     </div>
+    <!-- <button id="playMusicBtn" style="margin-top:10px;">Play Music</button> -->
+
+    <!-- Add the volume icon button in the top right -->
+    <button id="volumeBtn" style="
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        background: none;
+        border: none;
+        font-size: 32px;
+        color: #fff;
+        cursor: pointer;
+        z-index: 20;
+        outline: none;
+    ">
+        🔊
+    </button>
+    <audio id="bgMusic" src="music.mp3" loop></audio>
     <!-- Add Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -169,6 +187,52 @@
                 else if (e.key === "ArrowRight" && direction.x !== -1) direction = {x: 1, y: 0};
             }
         });
+
+        const volumeBtn = document.getElementById('volumeBtn');
+        const bgMusic = document.getElementById('bgMusic');
+        let musicPlaying = false;
+
+        // Try to autoplay
+        window.addEventListener('DOMContentLoaded', () => {
+            bgMusic.play().then(() => {
+                volumeBtn.textContent = "🔊";
+                musicPlaying = true;
+            }).catch(() => {
+                // Autoplay blocked
+                const startMusic = () => {
+                    bgMusic.play();
+                    volumeBtn.textContent = "🔊";
+                    musicPlaying = true;
+                    window.removeEventListener('keydown', startMusic);
+                    window.removeEventListener('mousedown', startMusic);
+                };
+                window.addEventListener('keydown', startMusic);
+                window.addEventListener('mousedown', startMusic);
+            });
+        });
+
+        // volume button
+        volumeBtn.onclick = function() {
+            if (!musicPlaying) {
+                bgMusic.play();
+                volumeBtn.textContent = "🔊";
+                musicPlaying = true;
+            } else {
+                bgMusic.pause();
+                volumeBtn.textContent = "🔇";
+                musicPlaying = false;
+            }
+        };
+
+        // Optional: update icon if music ends or is paused by other means
+        bgMusic.onpause = function() {
+            volumeBtn.textContent = "🔇";
+            musicPlaying = false;
+        };
+        bgMusic.onplay = function() {
+            volumeBtn.textContent = "🔊";
+            musicPlaying = true;
+        };
 
         setInterval(gameLoop, 100);
     </script>
