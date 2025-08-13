@@ -87,6 +87,21 @@
     ">
         🔊
     </button>
+    <!-- Add the light/dark mode button under the volume button -->
+    <button id="modeBtn" style="
+        position: absolute;
+        top: 62px;
+        right: 30px;
+        background: none;
+        border: none;
+        font-size: 32px;
+        color: #fff;
+        cursor: pointer;
+        z-index: 20;
+        outline: none;
+    ">
+        🌑
+    </button>
     <audio id="bgMusic" src="music.mp3" loop></audio>
     <!-- Add Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -290,6 +305,32 @@
         bgMusic.onplay = function() {
             volumeBtn.textContent = "🔊";
             musicPlaying = true;
+        };
+
+        const modeBtn = document.getElementById('modeBtn');
+        let darkMode = true;
+
+        modeBtn.onclick = function() {
+            darkMode = !darkMode;
+            if (darkMode) {
+                document.body.style.background = "#222";
+                document.querySelector('h1').style.color = "#fff";
+                document.getElementById('score').style.color = "#fff";
+                document.getElementById('highscore').style.color = "#fff";
+                document.getElementById('leaderboard').style.background = "rgba(70,70,70,0.9)"; // lighter shade of black
+                document.getElementById('leaderboard').style.color = "#fff";
+                document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#fff");
+                modeBtn.textContent = "🌑";
+            } else {
+                document.body.style.background = "#f7f7f7";
+                document.querySelector('h1').style.color = "#222";
+                document.getElementById('score').style.color = "#222";
+                document.getElementById('highscore').style.color = "#222";
+                document.getElementById('leaderboard').style.background = "rgba(255,255,255,0.9)";
+                document.getElementById('leaderboard').style.color = "#222";
+                document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#222");
+                modeBtn.textContent = "☀️";
+            }
         };
 
         // Replace initial child placement with function call
