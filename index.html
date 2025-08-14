@@ -192,13 +192,14 @@
         }
         updateLeaderboard();
 
-        // Place child at random position, not on snake
+        // Place child at random position, not on snake or police
         function placeChild() {
             let valid = false;
             while (!valid) {
                 child.x = Math.floor(Math.random() * tileCount);
                 child.y = Math.floor(Math.random() * tileCount);
-                valid = !snake.some(segment => segment.x === child.x && segment.y === child.y);
+                valid = !snake.some(segment => segment.x === child.x && segment.y === child.y)
+                    && !police.some(p => p.x === child.x && p.y === child.y);
             }
         }
 
