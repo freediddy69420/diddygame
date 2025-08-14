@@ -40,6 +40,21 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             height: fit-content;
         }
+
+        /* Mobile controls styles */
+        #mobileControls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            user-select: none;
+        }
+        .mc-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 32px;
+            margin: 4px;
+        }
     </style>
 </head>
 <body>
@@ -631,7 +646,70 @@
             childEmoji = childSkins[childSkinIndex];
             skinBtn.textContent = childEmoji;
         };
+
+        // Mobile controls event listeners
+        document.getElementById('mc-up').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            if (!paused && direction.y !== 1) direction = {x: 0, y: -1};
+        });
+        document.getElementById('mc-down').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            if (!paused && direction.y !== -1) direction = {x: 0, y: 1};
+        });
+        document.getElementById('mc-left').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            if (!paused && direction.x !== 1) direction = {x: -1, y: 0};
+        });
+        document.getElementById('mc-right').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            if (!paused && direction.x !== -1) direction = {x: 1, y: 0};
+        });
+
+        // Optional: Also support mouse clicks for desktop users
+        document.getElementById('mc-up').addEventListener('click', function() {
+            if (!paused && direction.y !== 1) direction = {x: 0, y: -1};
+        });
+        document.getElementById('mc-down').addEventListener('click', function() {
+            if (!paused && direction.y !== -1) direction = {x: 0, y: 1};
+        });
+        document.getElementById('mc-left').addEventListener('click', function() {
+            if (!paused && direction.x !== 1) direction = {x: -1, y: 0};
+        });
+        document.getElementById('mc-right').addEventListener('click', function() {
+            if (!paused && direction.x !== -1) direction = {x: 1, y: 0};
+        });
+
+        // Show mobile controls only on mobile devices
+        function isMobileDevice() {
+            return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|BlackBerry/i.test(navigator.userAgent);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const mobileControls = document.getElementById('mobileControls');
+            if (!isMobileDevice()) {
+                mobileControls.style.display = 'none';
+            } else {
+                mobileControls.style.display = 'flex';
+            }
+        });
     </script>
+    <!-- Add mobile controls below the canvas -->
+    <div id="mobileControls" style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+        user-select: none;
+    ">
+        <div>
+            <button class="mc-btn" id="mc-up" style="width:60px;height:60px;font-size:32px;margin:4px;">⬆️</button>
+        </div>
+        <div>
+            <button class="mc-btn" id="mc-left" style="width:60px;height:60px;font-size:32px;margin:4px;">⬅️</button>
+            <button class="mc-btn" id="mc-down" style="width:60px;height:60px;font-size:32px;margin:4px;">⬇️</button>
+            <button class="mc-btn" id="mc-right" style="width:60px;height:60px;font-size:32px;margin:4px;">➡️</button>
+        </div>
+    </div>
 </body>
 
 </html>
