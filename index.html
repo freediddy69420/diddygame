@@ -133,7 +133,13 @@
 
         // Diddy and child representations
         const diddy = "👨🏿";
-        const childEmoji = "👶🏻";
+        // Child skin options (all skin tones for 👶🏻 and 🧒🏻)
+        const childSkins = [
+            "👶🏻", "👶🏼", "👶🏽", "👶🏾", "👶🏿",
+            "🧒🏻", "🧒🏼", "🧒🏽", "🧒🏾", "🧒🏿"
+        ];
+        let childSkinIndex = 0;
+        let childEmoji = childSkins[childSkinIndex];
 
         function drawTile(x, y, emoji) {
             ctx.font = `${gridSize}px Arial`;
@@ -538,6 +544,27 @@
 
         // Start game loop with interval
         gameInterval = setInterval(gameLoop, gameSpeed);
+
+        // Add a button to cycle child skins
+        const skinBtn = document.createElement('button');
+        skinBtn.id = "skinBtn";
+        skinBtn.style.position = "absolute";
+        skinBtn.style.top = "104px";
+        skinBtn.style.right = "30px";
+        skinBtn.style.background = "none";
+        skinBtn.style.border = "none";
+        skinBtn.style.fontSize = "32px";
+        skinBtn.style.cursor = "pointer";
+        skinBtn.style.zIndex = "20";
+        skinBtn.style.outline = "none";
+        skinBtn.textContent = childEmoji;
+        document.body.appendChild(skinBtn);
+
+        skinBtn.onclick = function() {
+            childSkinIndex = (childSkinIndex + 1) % childSkins.length;
+            childEmoji = childSkins[childSkinIndex];
+            skinBtn.textContent = childEmoji;
+        };
     </script>
 </body>
 
