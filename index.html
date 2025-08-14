@@ -97,13 +97,11 @@
         right: 30px;
         background: none;
         border: none;
-       
-        color: #fff;
         cursor: pointer;
         z-index: 20;
         outline: none;
     ">
-        🌑
+        <span id="modeEmoji" style="font-size: 32px;">🌑</span>
     </button>
     <audio id="bgMusic" src="music.mp3" loop></audio>
     <!-- Add Firebase SDKs -->
@@ -507,6 +505,7 @@
         };
 
         const modeBtn = document.getElementById('modeBtn');
+        const modeEmoji = document.getElementById('modeEmoji');
         let darkMode = true;
 
         modeBtn.onclick = function() {
@@ -516,12 +515,11 @@
                 document.querySelector('h1').style.color = "#fff";
                 document.getElementById('score').style.color = "#fff";
                 document.getElementById('highscore').style.color = "#fff";
-                document.getElementById('leaderboard').style.background = "rgba(70,70,70,0.9)"; // lighter shade of black
+                document.getElementById('leaderboard').style.background = "rgba(70,70,70,0.9)";
                 document.getElementById('leaderboard').style.color = "#fff";
                 document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#fff");
-                // Set canvas background to match leaderboard in dark mode
                 canvas.style.background = "#464646";
-                modeBtn.textContent = "🌑";
+                modeEmoji.textContent = "🌑";
             } else {
                 document.body.style.background = "#f7f7f7";
                 document.querySelector('h1').style.color = "#222";
@@ -530,9 +528,8 @@
                 document.getElementById('leaderboard').style.background = "rgba(255,255,255,0.9)";
                 document.getElementById('leaderboard').style.color = "#222";
                 document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#222");
-                // Keep canvas background as it was for light mode
                 canvas.style.background = "#fff";
-                modeBtn.textContent = "☀️";
+                modeEmoji.textContent = "☀️";
             }
         };
 
