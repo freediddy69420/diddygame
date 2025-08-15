@@ -532,7 +532,7 @@
                 } else {
                     alert("Game Over! The police caught Diddy! Final Score: " + score);
 
-                    // Submit score to global leaderboard
+                    // Submit score to leaderboard
                     if (score > 0) {
                         db.ref('leaderboard').push({
                             name: playerName,
@@ -564,7 +564,7 @@
             }
         }
 
-        // Utility to change game speed
+        // change game speed
         function setGameSpeed(ms) {
             gameSpeed = ms;
             clearInterval(gameInterval);
@@ -596,7 +596,7 @@
         const bgMusic = document.getElementById('bgMusic');
         let musicPlaying = false;
 
-        // Try to autoplay
+        // autoplay
         window.addEventListener('DOMContentLoaded', () => {
             bgMusic.play().then(() => {
                 volumeBtn.textContent = "🔊";
@@ -628,7 +628,7 @@
             }
         };
 
-        // Optional: update icon if music ends or is paused by other means
+        // update icon if music is paused
         bgMusic.onpause = function() {
             volumeBtn.textContent = "🔇";
             musicPlaying = false;
@@ -673,7 +673,7 @@
         // Start game loop with interval
         gameInterval = setInterval(gameLoop, gameSpeed);
 
-        // Add a button to cycle child skins
+        // skins
         const skinBtn = document.createElement('button');
         skinBtn.id = "skinBtn";
         skinBtn.style.position = "absolute";
