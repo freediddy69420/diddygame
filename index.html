@@ -571,13 +571,20 @@
             gameInterval = setInterval(gameLoop, gameSpeed);
         }
 
+        let lastInputTime = 0;
+        const inputDelay = 100; // milliseconds
+
         document.addEventListener('keydown', e => {
+            const now = Date.now();
+            if (now - lastInputTime < inputDelay) return; // Ignore if not enough time has passed
+            lastInputTime = now;
+
             if (e.key === "Escape") {
                 paused = !paused;
                 showPauseMenu(paused);
             }
             if (!paused) {
-                // Arrow keys
+                // Arrow keys and WASD
                 if ((e.key === "ArrowUp" || e.key === "w" || e.key === "W") && direction.y !== 1) direction = {x: 0, y: -1};
                 else if ((e.key === "ArrowDown" || e.key === "s" || e.key === "S") && direction.y !== -1) direction = {x: 0, y: 1};
                 else if ((e.key === "ArrowLeft" || e.key === "a" || e.key === "A") && direction.x !== 1) direction = {x: -1, y: 0};
