@@ -8,7 +8,7 @@ https://ashton20271.github.io/diddygame/
 
 https://freediddy69420.github.io/diddygame/
 
-(extention)[https://github.com/Ashton20271/diddygame/releases/download/v1/diddy.game.extention.zip]
+[extention](https://github.com/Ashton20271/diddygame/releases/download/v1/diddy.game.extention.zip)
 # Powerups
 🍼=x2 points for next child
 
