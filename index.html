@@ -707,9 +707,34 @@
                 document.exitFullscreen();
             }
         };
-    </script>
- 
+
+    // 2. Idle Disconnect Logic (Realtime Database)
+    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    let idleTimer;
+
+    function goOffline() {
+      console.log("Going offline to save connections...");
+      firebase.database().goOffline(); // For Realtime Database
+      // For Firestore use: firebase.firestore().disableNetwork();
+    }
+
+    function goOnline() {
+      console.log("Reconnecting to Firebase...");
+      firebase.database().goOnline(); // For Realtime Database
+      // For Firestore use: firebase.firestore().enableNetwork();
+    }
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      goOnline();
+      idleTimer = setTimeout(goOffline, IDLE_TIMEOUT);
+    }
+
+    ["mousemove", "keydown", "touchstart", "click"].forEach(event =>
+      window.addEventListener(event, resetIdleTimer)
+    );
+
+    resetIdleTimer();
+  </script>
 </body>
-
 </html>
-
