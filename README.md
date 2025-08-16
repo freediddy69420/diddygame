@@ -8,7 +8,7 @@ https://ashton20271.github.io/diddygame/
 
 https://freediddy69420.github.io/diddygame/
 
-[extention](https://github.com/Ashton20271/diddygame/releases/download/v1/diddy.game.extention.zip)
+[![extention](https://img.shields.io/github/downloads/Ashton20271/ep-not-focused-on-window-bypass/total.svg)](https://github.com/Ashton20271/diddygame/releases/latest)
 # Powerups
 🍼=x2 points for next child
 
