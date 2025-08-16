@@ -96,9 +96,34 @@
             <canvas id="game" width="400" height="400"></canvas>
         </div>
     </div>
+    <!-- Add pause/resume toggle button on the right side -->
+    <button id="pauseToggleBtn" style="
+        position: absolute;
+        top: 188px;
+        right: 30px;
+        background: none;
+        border: none;
+        font-size: 32px;
+        color: #fff;
+        cursor: pointer;
+        z-index: 20;
+        outline: none;
+    ">
+        ⏸️
+    </button>
     <div id="pauseMenu" style="display:none; position:absolute; top:50px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:30px 50px; border-radius:10px; font-size:24px; z-index:10; text-align:center;">
         <div>Paused</div>
         <div style="font-size:16px; margin-top:10px;">Press ESC to resume</div>
+        <button id="resumeBtn" style="
+            margin-top: 20px;
+            font-size: 20px;
+            padding: 8px 24px;
+            border-radius: 8px;
+            border: none;
+            background: #444;
+            color: #fff;
+            cursor: pointer;
+        ">Resume</button>
     </div>
     <!-- <button id="playMusicBtn" style="margin-top:10px;">Play Music</button> -->
 
@@ -194,7 +219,21 @@
 
         function showPauseMenu(show) {
             document.getElementById('pauseMenu').style.display = show ? 'block' : 'none';
+            document.getElementById('pauseToggleBtn').textContent = show ? "▶️" : "⏸️";
         }
+
+        // Pause/Resume toggle button logic
+        const pauseToggleBtn = document.getElementById('pauseToggleBtn');
+        pauseToggleBtn.onclick = function() {
+            paused = !paused;
+            showPauseMenu(paused);
+        };
+
+        // Resume button in pause menu
+        document.getElementById('resumeBtn').onclick = function() {
+            paused = false;
+            showPauseMenu(false);
+        };
 
         // Firebase config
         const firebaseConfig = {
