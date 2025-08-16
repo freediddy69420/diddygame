@@ -51,6 +51,33 @@
             height: 100vh !important;
             display: block;
         }
+        
+        button,
+        a[role="button"],
+        #githubBtn,
+        #downloadBtn,
+        #volumeBtn,
+        #modeBtn,
+        #fullscreenBtn,
+        #skinBtn,
+        #pauseToggleBtn {
+            transition: transform 0.15s, box-shadow 0.15s, background 0.15s, filter 0.15s;
+        }
+
+        button:hover,
+        a[role="button"]:hover,
+        #githubBtn:hover,
+        #downloadBtn:hover,
+        #volumeBtn:hover,
+        #modeBtn:hover,
+        #fullscreenBtn:hover,
+        #skinBtn:hover,
+        #pauseToggleBtn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+            filter: brightness(1.2);
+            background: rgba(255,255,255,0.08);
+        }
     </style>
 </head>
 <body>
