@@ -16,5 +16,6 @@ https://freediddy69420.github.io/diddygame/
 
 🛡️= invincibility spawns at score 50 (lasts 10 seconds)
 
+🧑🏻‍⚖️=lawer removes all police and doesnt kill you when you touch next police 1% chance (100% at score 30)
 # Disclaimers 
 i do not support diddy in any way this game is satire
