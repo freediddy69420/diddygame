@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Diddy Game",
+  "version": "1.0",
+  "description": "Play Diddy Game in a new tab.",
+  "icons": {
+    "48": "icon-48.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Diddy Game"
+  },
+  "permissions": [
+    "tabs"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

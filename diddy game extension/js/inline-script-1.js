@@ -1,0 +1,573 @@
+const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        let snake = [{x: 10, y: 10}];
+        let direction = {x: 0, y: 0};
+        let child = {x: 5, y: 5};
+        let score = 0;
+        let powerup = null;
+        let powerupActive = false;
+        let invincibilityPowerup = null;
+        let invincible = false;
+        let invincibilityTimer = 0;
+        let speedPowerup = null;
+        let speedBoostActive = false;
+        let speedBoostTimer = 0;
+        let gameSpeed = 100; // default interval ms
+        let gameInterval;
+
+        // Highscore feature
+        let highscore = localStorage.getItem('diddyHighScore') ? parseInt(localStorage.getItem('diddyHighScore')) : 0;
+        document.getElementById('highscore').textContent = "High Score: " + highscore;
+
+        // Diddy and child representations
+        const diddy = "👨🏿";
+        // Child skin options
+        const childSkins = [
+            "👶🏻", "👶🏼", "👶🏽", "👶🏾", "👶🏿","👶",
+            "🧒🏻", "🧒🏼", "🧒🏽", "🧒🏾", "🧒🏿","🧒",
+        ];
+        let childSkinIndex = 0;
+        let childEmoji = childSkins[childSkinIndex];
+
+        function drawTile(x, y, emoji) {
+            ctx.font = `${gridSize}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(emoji, x * gridSize + gridSize/2, y * gridSize + gridSize/2);
+        }
+
+        let paused = false;
+
+        function showPauseMenu(show) {
+            document.getElementById('pauseMenu').style.display = show ? 'block' : 'none';
+        }
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "apiKey",
+            authDomain: "diddygame-dfd89.firebaseapp.com",
+            databaseURL: "https://diddygame-dfd89-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "diddygame-dfd89",
+            storageBucket: "diddygame-dfd89.appspot.com",
+            messagingSenderId: "662132817791",
+            appId: "1:662132817791:web:7328705ae63440f01e244a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function updateLeaderboard() {
+            db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snapshot => {
+                const items = [];
+                snapshot.forEach(child => {
+                    items.push(child.val());
+                });
+                items.reverse(); // Highest score first
+                const list = document.getElementById('leaderboardList');
+                list.innerHTML = '';
+                items.forEach((entry, i) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${entry.name}: ${entry.score}`;
+                    list.appendChild(li);
+                });
+            });
+        }
+
+        // Prompt for player name
+        let playerName = localStorage.getItem('diddyPlayerName');
+        if (!playerName) {
+            playerName = prompt("Enter your name for the leaderboard:") || "Anonymous";
+            localStorage.setItem('diddyPlayerName', playerName);
+        }
+        updateLeaderboard();
+
+        // Place child at random position, not on snake or police
+        function placeChild() {
+            let valid = false;
+            while (!valid) {
+                child.x = Math.floor(Math.random() * tileCount);
+                child.y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === child.x && segment.y === child.y)
+                    && !police.some(p => p.x === child.x && p.y === child.y);
+            }
+        }
+
+        let police = []; // Array to hold police positions
+
+        // Place police at random position, not on snake, child, or powerups
+        function placePolice() {
+            let valid = false;
+            let x, y;
+            while (!valid) {
+                x = Math.floor(Math.random() * tileCount);
+                y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y) &&
+                        !(invincibilityPowerup && invincibilityPowerup.x === x && invincibilityPowerup.y === y) &&
+                        !(speedPowerup && speedPowerup.x === x && speedPowerup.y === y) &&
+                        !police.some(p => p.x === x && p.y === y);
+            }
+            police.push({x, y});
+        }
+
+        // Randomly spawn police every few ticks
+        let policeSpawnCounter = 0;
+
+        // Place power-up at random position, not on snake or child
+        function placePowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y);
+                if (valid) powerup = {x, y};
+            }
+        }
+
+        // Place invincibility power-up at random position, not on snake or child
+        function placeInvincibilityPowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y);
+                if (valid) invincibilityPowerup = {x, y};
+            }
+        }
+
+        // Place speed power-up at random position, not on snake, child, or other powerups
+        function placeSpeedPowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y) &&
+                        !(invincibilityPowerup && invincibilityPowerup.x === x && invincibilityPowerup.y === y);
+                if (valid) speedPowerup = {x, y};
+            }
+        }
+
+        let lawyerPowerup = null;
+        let lawyerActive = false;
+
+        // Place lawyer power-up at random position, not on snake, child, police, or other powerups
+        function placeLawyerPowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y) &&
+                        !(invincibilityPowerup && invincibilityPowerup.x === x && invincibilityPowerup.y === y) &&
+                        !(speedPowerup && speedPowerup.x === x && speedPowerup.y === y) &&
+                        !(lawyerPowerup && lawyerPowerup.x === x && lawyerPowerup.y === y) &&
+                        !police.some(p => p.x === x && p.y === y);
+                if (valid) lawyerPowerup = {x, y};
+            }
+        }
+
+        // Randomly decide to spawn a power-up after child is collected
+        function maybeSpawnPowerup() {
+            if (!powerup && Math.random() < 0.2) { // 20% chance
+                placePowerup();
+            }
+        }
+
+        function gameLoop() {
+            if (paused) return;
+
+            // Move diddy
+            if (direction.x !== 0 || direction.y !== 0) {
+                const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+                snake.unshift(head);
+
+                // Check if child touched
+                if (head.x === child.x && head.y === child.y) {
+                    let points = 1;
+                    if (powerupActive) {
+                        points = 2;
+                        powerupActive = false;
+                    }
+                    score += points;
+                    document.getElementById('score').textContent = "Score: " + score;
+                    if (score > highscore) {
+                        highscore = score;
+                        localStorage.setItem('diddyHighScore', highscore);
+                        document.getElementById('highscore').textContent = "High Score: " + highscore;
+                    }
+                    placeChild();
+                    maybeSpawnPowerup();
+
+                    // Spawn speed powerup at score 25
+                    if (score === 25 && !speedPowerup) {
+                        placeSpeedPowerup();
+                    }
+                    // Spawn invincibility powerup at score 50
+                    if (score === 50 && !invincibilityPowerup) {
+                        placeInvincibilityPowerup();
+                    }
+                    // Spawn lawyer powerup at score 30 (always)
+                    if (score === 30 && !lawyerPowerup) {
+                        placeLawyerPowerup();
+                    }
+                    // 1% chance to spawn lawyer on any child collection (except score 30)
+                    if (score !== 30 && !lawyerPowerup && Math.random() < 0.01) {
+                        placeLawyerPowerup();
+                    }
+                } else if (powerup && head.x === powerup.x && head.y === powerup.y) {
+                    powerupActive = true;
+                    powerup = null;
+                } else if (speedPowerup && head.x === speedPowerup.x && head.y === speedPowerup.y) {
+                    speedBoostActive = true;
+                    speedBoostTimer = 100; // lasts for 100 game ticks (~10 seconds)
+                    speedPowerup = null;
+                    setGameSpeed(gameSpeed / 2); // double speed
+                } else if (invincibilityPowerup && head.x === invincibilityPowerup.x && head.y === invincibilityPowerup.y) {
+                    invincible = true;
+                    invincibilityTimer = 100; // lasts for 100 game ticks (~10 seconds)
+                    invincibilityPowerup = null;
+                } else if (lawyerPowerup && head.x === lawyerPowerup.x && head.y === lawyerPowerup.y) {
+                    lawyerActive = true;
+                    lawyerPowerup = null;
+                    police = []; // Remove all police
+                } else {
+                    snake.pop();
+                }
+
+                // Check collision with walls or self
+                if (
+                    (head.x < 0 || head.x >= tileCount ||
+                    head.y < 0 || head.y >= tileCount)
+                ) {
+                    if (invincible) {
+                        // If invincible, teleport to center instead of game over
+                        snake[0] = {x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)};
+                        direction = {x: 0, y: 0};
+                    } else if (snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
+                        // Game over on self collision if not invincible
+                        alert("Game Over! Final Score: " + score);
+
+                        // Submit score to global leaderboard
+                        if (score > 0) {
+                            db.ref('leaderboard').push({
+                                name: playerName,
+                                score: score,
+                                timestamp: Date.now()
+                            });
+                            setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                        }
+
+                        snake = [{x: 10, y: 10}];
+                        direction = {x: 0, y: 0};
+                        score = 0;
+                        document.getElementById('score').textContent = "Score: 0";
+                        placeChild();
+                        powerup = null;
+                        powerupActive = false;
+                        invincibilityPowerup = null;
+                        invincible = false;
+                        invincibilityTimer = 0;
+                        speedPowerup = null;
+                        speedBoostActive = false;
+                        speedBoostTimer = 0;
+                        setGameSpeed(100); // reset speed
+                        police = [];
+                    } else {
+                        // Game over on wall collision if not invincible
+                        alert("Game Over! Final Score: " + score);
+
+                        // Submit score to global leaderboard
+                        if (score > 0) {
+                            db.ref('leaderboard').push({
+                                name: playerName,
+                                score: score,
+                                timestamp: Date.now()
+                            });
+                            setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                        }
+
+                        snake = [{x: 10, y: 10}];
+                        direction = {x: 0, y: 0};
+                        score = 0;
+                        document.getElementById('score').textContent = "Score: 0";
+                        placeChild();
+                        powerup = null;
+                        powerupActive = false;
+                        invincibilityPowerup = null;
+                        invincible = false;
+                        invincibilityTimer = 0;
+                        speedPowerup = null;
+                        speedBoostActive = false;
+                        speedBoostTimer = 0;
+                        setGameSpeed(100); // reset speed
+                        police = [];
+                    }
+                } else if (!invincible && snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
+                    // Game over on self collision if not invincible
+                    alert("Game Over! Final Score: " + score);
+
+                    // Submit score to global leaderboard
+                    if (score > 0) {
+                        db.ref('leaderboard').push({
+                            name: playerName,
+                            score: score,
+                            timestamp: Date.now()
+                        });
+                        setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                    }
+
+                    snake = [{x: 10, y: 10}];
+                    direction = {x: 0, y: 0};
+                    score = 0;
+                    document.getElementById('score').textContent = "Score: 0";
+                    placeChild();
+                    powerup = null;
+                    powerupActive = false;
+                    invincibilityPowerup = null;
+                    invincible = false;
+                    invincibilityTimer = 0;
+                    speedPowerup = null;
+                    speedBoostActive = false;
+                    speedBoostTimer = 0;
+                    setGameSpeed(100); // reset speed
+                    police = [];
+                }
+            }
+
+            // Police spawn logic
+            policeSpawnCounter++;
+            if (policeSpawnCounter > 30 && Math.random() < 0.05 && police.length < 6) { // ~every 30 ticks, 5% chance, max 6 police
+                placePolice();
+                policeSpawnCounter = 0;
+            }
+
+            // Handle invincibility timer
+            if (invincible) {
+                invincibilityTimer--;
+                if (invincibilityTimer <= 0) {
+                    invincible = false;
+                }
+            }
+
+            // Handle speed boost timer
+            if (speedBoostActive) {
+                speedBoostTimer--;
+                if (speedBoostTimer <= 0) {
+                    speedBoostActive = false;
+                    setGameSpeed(100); // reset to normal speed
+                }
+            }
+
+            // Draw everything
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTile(child.x, child.y, childEmoji);
+            if (powerup) drawTile(powerup.x, powerup.y, "🧴");
+            if (speedPowerup) drawTile(speedPowerup.x, speedPowerup.y, "⚡");
+            if (invincibilityPowerup) drawTile(invincibilityPowerup.x, invincibilityPowerup.y, "🛡️");
+            if (lawyerPowerup) drawTile(lawyerPowerup.x, lawyerPowerup.y, "🧑🏻‍⚖️");
+            snake.forEach((segment, i) => {
+                drawTile(segment.x, segment.y, diddy);
+            });
+            if (invincible) {
+                ctx.save();
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = "#00ff00";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+            if (speedBoostActive) {
+                ctx.save();
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = "#ffff00";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+            police.forEach(p => drawTile(p.x, p.y, "👮‍♂️"));
+
+            // Check collision with police
+            if (police.some(p => p.x === snake[0].x && p.y === snake[0].y)) {
+                if (lawyerActive) {
+                    lawyerActive = false; // Only protects once
+                    police = []; // Remove all police
+                } else {
+                    alert("Game Over! The police caught Diddy! Final Score: " + score);
+
+                    // Submit score to leaderboard
+                    if (score > 0) {
+                        db.ref('leaderboard').push({
+                            name: playerName,
+                            score: score,
+                            timestamp: Date.now()
+                        });
+                        setTimeout(updateLeaderboard, 500);
+                    }
+
+                    snake = [{x: 10, y: 10}];
+                    direction = {x: 0, y: 0};
+                    score = 0;
+                    document.getElementById('score').textContent = "Score: 0";
+                    placeChild();
+                    powerup = null;
+                    powerupActive = false;
+                    invincibilityPowerup = null;
+                    invincible = false;
+                    invincibilityTimer = 0;
+                    speedPowerup = null;
+                    speedBoostActive = false;
+                    speedBoostTimer = 0;
+                    police = [];
+                    lawyerPowerup = null;
+                    lawyerActive = false;
+                    setGameSpeed(100);
+                    return;
+                }
+            }
+        }
+
+        // change game speed
+        function setGameSpeed(ms) {
+            gameSpeed = ms;
+            clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, gameSpeed);
+        }
+
+        let lastInputTime = 0;
+        const inputDelay = 60; // milliseconds
+
+        document.addEventListener('keydown', e => {
+            const now = Date.now();
+            if (now - lastInputTime < inputDelay) return; // Ignore if not enough time has passed
+            lastInputTime = now;
+
+            if (e.key === "Escape") {
+                paused = !paused;
+                showPauseMenu(paused);
+            }
+            if (!paused) {
+                // Arrow keys and WASD
+                if ((e.key === "ArrowUp" || e.key === "w" || e.key === "W") && direction.y !== 1) direction = {x: 0, y: -1};
+                else if ((e.key === "ArrowDown" || e.key === "s" || e.key === "S") && direction.y !== -1) direction = {x: 0, y: 1};
+                else if ((e.key === "ArrowLeft" || e.key === "a" || e.key === "A") && direction.x !== 1) direction = {x: -1, y: 0};
+                else if ((e.key === "ArrowRight" || e.key === "d" || e.key === "D") && direction.x !== -1) direction = {x: 1, y: 0};
+            }
+        });
+
+        const volumeBtn = document.getElementById('volumeBtn');
+        const bgMusic = document.getElementById('bgMusic');
+        let musicPlaying = false;
+
+        // autoplay
+        window.addEventListener('DOMContentLoaded', () => {
+            bgMusic.play().then(() => {
+                volumeBtn.textContent = "🔊";
+                musicPlaying = true;
+            }).catch(() => {
+                // Autoplay blocked
+                const startMusic = () => {
+                    bgMusic.play();
+                    volumeBtn.textContent = "🔊";
+                    musicPlaying = true;
+                    window.removeEventListener('keydown', startMusic);
+                    window.removeEventListener('mousedown', startMusic);
+                };
+                window.addEventListener('keydown', startMusic);
+                window.addEventListener('mousedown', startMusic);
+            });
+        });
+
+        // volume button
+        volumeBtn.onclick = function() {
+            if (!musicPlaying) {
+                bgMusic.play();
+                volumeBtn.textContent = "🔊";
+                musicPlaying = true;
+            } else {
+                bgMusic.pause();
+                volumeBtn.textContent = "🔇";
+                musicPlaying = false;
+            }
+        };
+
+        // update icon if music is paused
+        bgMusic.onpause = function() {
+            volumeBtn.textContent = "🔇";
+            musicPlaying = false;
+        };
+        bgMusic.onplay = function() {
+            volumeBtn.textContent = "🔊";
+            musicPlaying = true;
+        };
+
+        const modeBtn = document.getElementById('modeBtn');
+        const modeEmoji = document.getElementById('modeEmoji');
+        let darkMode = true;
+
+        modeBtn.onclick = function() {
+            darkMode = !darkMode;
+            if (darkMode) {
+                document.body.style.background = "#222";
+                document.querySelector('h1').style.color = "#fff";
+                document.getElementById('score').style.color = "#fff";
+                document.getElementById('highscore').style.color = "#fff";
+                document.getElementById('leaderboard').style.background = "rgba(70,70,70,0.9)";
+                document.getElementById('leaderboard').style.color = "#fff";
+                document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#fff");
+                canvas.style.background = "#464646";
+                modeEmoji.textContent = "🌑";
+            } else {
+                document.body.style.background = "#f7f7f7";
+                document.querySelector('h1').style.color = "#222";
+                document.getElementById('score').style.color = "#222";
+                document.getElementById('highscore').style.color = "#222";
+                document.getElementById('leaderboard').style.background = "rgba(255,255,255,0.9)";
+                document.getElementById('leaderboard').style.color = "#222";
+                document.querySelectorAll('#leaderboardList li').forEach(li => li.style.color = "#222");
+                canvas.style.background = "#fff";
+                modeEmoji.textContent = "☀️";
+            }
+        };
+
+        // Replace initial child placement with function call
+        placeChild();
+
+        // Start game loop with interval
+        gameInterval = setInterval(gameLoop, gameSpeed);
+
+        // skins
+        const skinBtn = document.createElement('button');
+        skinBtn.id = "skinBtn";
+        skinBtn.style.position = "absolute";
+        skinBtn.style.top = "104px";
+        skinBtn.style.right = "30px";
+        skinBtn.style.background = "none";
+        skinBtn.style.border = "none";
+        skinBtn.style.fontSize = "32px";
+        skinBtn.style.cursor = "pointer";
+        skinBtn.style.zIndex = "20";
+        skinBtn.style.outline = "none";
+        skinBtn.textContent = childEmoji;
+        document.body.appendChild(skinBtn);
+
+        skinBtn.onclick = function() {
+            childSkinIndex = (childSkinIndex + 1) % childSkins.length;
+            childEmoji = childSkins[childSkinIndex];
+            skinBtn.textContent = childEmoji;
+        };
+
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        fullscreenBtn.onclick = function() {
+            // Fullscreen only the canvas
+            if (!document.fullscreenElement) {
+                canvas.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        };
