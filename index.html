@@ -394,7 +394,7 @@
 
         // Randomly decide to spawn a power-up after child is collected
         function maybeSpawnPowerup() {
-            if (!powerup && Math.random() < 0.2) { // 20% chance
+            if (!powerup && Math.random() < 0.2) { 
                 placePowerup();
             }
         }
@@ -431,6 +431,10 @@
                     // Spawn invincibility powerup at score 50
                     if (score === 50 && !invincibilityPowerup) {
                         placeInvincibilityPowerup();
+                    }
+                    // 0.5% chance to spawn invincibility powerup on any child collection (except score 50)
+                    if (score !== 50 && !invincibilityPowerup && Math.random() < 0.005) {
+                     placeInvincibilityPowerup();
                     }
                     // Spawn lawyer powerup at score 30 (always)
                     if (score === 30 && !lawyerPowerup) {
@@ -612,9 +616,11 @@
 
             // Check collision with police
             if (police.some(p => p.x === snake[0].x && p.y === snake[0].y)) {
-                if (lawyerActive) {
-                    lawyerActive = false; // Only protects once
-                    police = []; // Remove all police
+                if (lawyerActive || invincible) {
+                    // If lawyer or invincibility is active, protect once and remove all police
+                    lawyerActive = false;
+                    invincible = false;
+                    police = [];
                 } else {
                     alert("Game Over! The police caught Diddy! Final Score: " + score);
 
