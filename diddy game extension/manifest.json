@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Diddy Game",
-  "version": "1.0",
-  "description": "Play Diddy Game in a new tab.",
+  "version": "1.2",
+  "description": "Diddy Game as a Chrome/Edge extension opens in a new tab.",
   "icons": {
     "48": "icon-48.png"
   },
