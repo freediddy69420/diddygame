@@ -8,7 +8,7 @@
   .mobile-controls {
     position: fixed;
     bottom: 20px;
-    left: 20px; /* move to left side */
+    right: 20px; /* move to right side */
     display: grid;
     grid-template-columns: 60px 60px 60px;
     grid-template-rows: 60px 60px 60px;
