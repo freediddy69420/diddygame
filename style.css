@@ -8,7 +8,7 @@
   .mobile-controls {
     position: fixed;
     bottom: 20px;
-    right: 20px; /* move to right side */
+    left: 20px; /* move to left side */
     display: grid;
     grid-template-columns: 60px 60px 60px;
     grid-template-rows: 60px 60px 60px;
@@ -33,27 +33,3 @@
 #btn-left { grid-column: 1; grid-row: 2; }
 #btn-down { grid-column: 2; grid-row: 2; }
 #btn-right{ grid-column: 3; grid-row: 2; }
-
-/* Mobile layout for side buttons */
-@media (max-width: 1024px) {
-  .side-buttons {
-    position: fixed;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    z-index: 10000;
-  }
-
-  .side-buttons button {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: 20px;
-  }
-}
