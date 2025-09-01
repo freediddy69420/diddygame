@@ -197,6 +197,51 @@
     ">
         🖥️
     </button>
+    <!-- Replace the sound changer dropdown with a music note button -->
+    <button id="musicNoteBtn" style="
+        position: absolute;
+        top: 230px;
+        right: 30px;
+        background: none;
+        border: none;
+        font-size: 32px;
+        color: #fff;
+        cursor: pointer;
+        z-index: 20;
+        outline: none;
+    ">
+        🎵
+    </button>
+    <!-- Music selection popup (hidden by default) -->
+    <div id="musicPopup" style="
+        display: none;
+        position: absolute;
+        top: 272px;
+        right: 30px;
+        background: #222;
+        color: #fff;
+        border-radius: 10px;
+        border: 1px solid #444;
+        padding: 12px 16px;
+        z-index: 30;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    ">
+        <label for="soundSelect" style="font-size:18px; margin-bottom:8px; display:block;">Choose Music:</label>
+        <select id="soundSelect" style="
+            font-size: 18px;
+            background: #222;
+            color: #fff;
+            border-radius: 6px;
+            border: 1px solid #444;
+            padding: 4px 8px;
+            outline: none;
+            width: 180px;
+        ">
+            <option value="music.mp3">Diddy</option>
+            <option value="music2.mp3">Touching kids</option>
+            <option value="music3.mp3">Baby oil</option>
+        </select>
+    </div>
     <audio id="bgMusic" src="music.mp3" loop></audio>
     <!-- Add Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -218,7 +263,7 @@
         let speedPowerup = null;
         let speedBoostActive = false;
         let speedBoostTimer = 0;
-        let gameSpeed = 100; // default interval ms
+        let gameSpeed = 100;
         let gameInterval;
 
         // Highscore feature
@@ -281,7 +326,7 @@
                 snapshot.forEach(child => {
                     items.push(child.val());
                 });
-                items.reverse(); // Highest score first
+                items.reverse();
                 const list = document.getElementById('leaderboardList');
                 list.innerHTML = '';
                 items.forEach((entry, i) => {
@@ -311,7 +356,7 @@
             }
         }
 
-        let police = []; // Array to hold police positions
+        let police = [];
 
         // Place police at random position, not on snake, child, or powerups
         function placePolice() {
@@ -500,7 +545,7 @@
                         speedPowerup = null;
                         speedBoostActive = false;
                         speedBoostTimer = 0;
-                        setGameSpeed(100); // reset speed
+                        setGameSpeed(100);
                         police = [];
                     } else {
                         // Game over on wall collision if not invincible
@@ -543,7 +588,7 @@
                             score: score,
                             timestamp: Date.now()
                         });
-                        setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                        setTimeout(updateLeaderboard, 500);
                     }
 
                     snake = [{x: 10, y: 10}];
@@ -559,7 +604,7 @@
                     speedPowerup = null;
                     speedBoostActive = false;
                     speedBoostTimer = 0;
-                    setGameSpeed(100); // reset speed
+                    setGameSpeed(100);
                     police = [];
                 }
             }
@@ -584,7 +629,7 @@
                 speedBoostTimer--;
                 if (speedBoostTimer <= 0) {
                     speedBoostActive = false;
-                    setGameSpeed(100); // reset to normal speed
+                    setGameSpeed(100);
                 }
             }
 
@@ -664,7 +709,7 @@
         }
 
         let lastInputTime = 0;
-        const inputDelay = 60; // milliseconds
+        const inputDelay = 60;
 
         document.addEventListener('keydown', e => {
             const now = Date.now();
@@ -686,7 +731,7 @@
 
         const volumeBtn = document.getElementById('volumeBtn');
         const bgMusic = document.getElementById('bgMusic');
-        let musicPlaying = false;
+        const soundSelect = document.getElementById('soundSelect');
 
         // autoplay
         window.addEventListener('DOMContentLoaded', () => {
@@ -797,12 +842,12 @@
         };
 
     // 2. Idle Disconnect Logic (Realtime Database)
-    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    const IDLE_TIMEOUT = 5 * 60 * 1000;
     let idleTimer;
 
     function goOffline() {
       console.log("Going offline to save connections...");
-      firebase.database().goOffline(); // For Realtime Database
+      firebase.database().goOffline();
       // For Firestore use: firebase.firestore().disableNetwork();
     }
 
@@ -823,6 +868,34 @@
     );
 
     resetIdleTimer();
+
+    let musicPlaying = false;
+
+    soundSelect.onchange = function() {
+        const wasPlaying = musicPlaying;
+        bgMusic.pause();
+        bgMusic.src = soundSelect.value;
+        bgMusic.load();
+        if (wasPlaying) {
+            bgMusic.play();
+        }
+    };
+
+    // Music note button logic
+    const musicNoteBtn = document.getElementById('musicNoteBtn');
+    const musicPopup = document.getElementById('musicPopup');
+
+    // Toggle popup when music note is clicked
+    musicNoteBtn.onclick = function() {
+        musicPopup.style.display = (musicPopup.style.display === "none" || musicPopup.style.display === "") ? "block" : "none";
+    };
+
+    // Optional: Hide popup when clicking outside
+    document.addEventListener('mousedown', function(e) {
+        if (!musicPopup.contains(e.target) && e.target !== musicNoteBtn) {
+            musicPopup.style.display = "none";
+        }
+    });
   </script>
 </body>
 </html>
