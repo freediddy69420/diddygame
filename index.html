@@ -8,6 +8,7 @@
     <meta property="og:description" content="Play Diddy Game and compete on the global leaderboard!" />
     <meta property="og:image" content="https://raw.githubusercontent.com/Ashton20271/diddygame/main/embed.png" />
     <meta property="og:url" content="https://ashton20271.github.io/diddygame/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #222; display: flex; flex-direction: column; align-items: center; }
         canvas { 
@@ -897,6 +898,52 @@
             musicPopup.style.display = "none";
         }
     });
+
+    // Mobile controls
+    const mobileControls = document.getElementById('mobileControls');
+    const mcUp = document.getElementById('mc-up');
+    const mcDown = document.getElementById('mc-down');
+    const mcLeft = document.getElementById('mc-left');
+    const mcRight = document.getElementById('mc-right');
+
+    function toggleMobileControls(show) {
+      mobileControls.style.display = show ? 'block' : 'none';
+    }
+
+    // Show controls on touch devices
+    if ('ontouchstart' in window) {
+      toggleMobileControls(true);
+
+      // Prevent default touch actions on canvas
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+      }, { passive: false });
+
+      // Mobile control buttons
+      mcUp.addEventListener('touchstart', () => { direction = {x: 0, y: -1}; });
+      mcDown.addEventListener('touchstart', () => { direction = {x: 0, y: 1}; });
+      mcLeft.addEventListener('touchstart', () => { direction = {x: -1, y: 0}; });
+      mcRight.addEventListener('touchstart', () => { direction = {x: 1, y: 0}; });
+
+      // Hide address bar on mobile Safari
+      if (window.navigator.userAgent.indexOf("Safari") !== -1) {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 0);
+      }
+    }
   </script>
+
+<!-- Mobile Controls -->
+<div class="mobile-controls">
+  <button id="btn-left">⬅</button>
+  <button id="btn-up">⬆</button>
+  <button id="btn-down">⬇</button>
+  <button id="btn-right">➡</button>
+</div>
+
+<link rel="stylesheet" href="style.css">
+<script src="main.js"></script>
+
 </body>
 </html>
