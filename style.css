@@ -8,12 +8,11 @@
   .mobile-controls {
     position: fixed;
     bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 20px; /* move to left side */
     display: grid;
     grid-template-columns: 60px 60px 60px;
-    grid-template-rows: 60px 60px;
-    gap: 10px;
+    grid-template-rows: 60px 60px 60px;
+    gap: 8px;
     z-index: 9999;
   }
 
@@ -29,7 +28,8 @@
   }
 }
 
-#btn-up { grid-column: 2; grid-row: 1; }
+/* D-pad layout */
+#btn-up   { grid-column: 2; grid-row: 1; }
 #btn-left { grid-column: 1; grid-row: 2; }
 #btn-down { grid-column: 2; grid-row: 2; }
-#btn-right { grid-column: 3; grid-row: 2; }
+#btn-right{ grid-column: 3; grid-row: 2; }
