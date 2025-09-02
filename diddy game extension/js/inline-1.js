@@ -14,7 +14,7 @@ const canvas = document.getElementById('game');
         let speedPowerup = null;
         let speedBoostActive = false;
         let speedBoostTimer = 0;
-        let gameSpeed = 100; // default interval ms
+        let gameSpeed = 100;
         let gameInterval;
 
         // Highscore feature
@@ -77,7 +77,7 @@ const canvas = document.getElementById('game');
                 snapshot.forEach(child => {
                     items.push(child.val());
                 });
-                items.reverse(); // Highest score first
+                items.reverse();
                 const list = document.getElementById('leaderboardList');
                 list.innerHTML = '';
                 items.forEach((entry, i) => {
@@ -107,7 +107,7 @@ const canvas = document.getElementById('game');
             }
         }
 
-        let police = []; // Array to hold police positions
+        let police = [];
 
         // Place police at random position, not on snake, child, or powerups
         function placePolice() {
@@ -236,7 +236,7 @@ const canvas = document.getElementById('game');
                     if (score === 30 && !lawyerPowerup) {
                         placeLawyerPowerup();
                     }
-                    // 1% chance to spawn lawyer on any child collection (except score 30)
+                    // 1% chance to spawn lawyer on any child collection
                     if (score !== 30 && !lawyerPowerup && Math.random() < 0.01) {
                         placeLawyerPowerup();
                     }
@@ -296,7 +296,7 @@ const canvas = document.getElementById('game');
                         speedPowerup = null;
                         speedBoostActive = false;
                         speedBoostTimer = 0;
-                        setGameSpeed(100); // reset speed
+                        setGameSpeed(100);
                         police = [];
                     } else {
                         // Game over on wall collision if not invincible
@@ -339,7 +339,7 @@ const canvas = document.getElementById('game');
                             score: score,
                             timestamp: Date.now()
                         });
-                        setTimeout(updateLeaderboard, 500); // Give Firebase time to update
+                        setTimeout(updateLeaderboard, 500);
                     }
 
                     snake = [{x: 10, y: 10}];
@@ -355,7 +355,7 @@ const canvas = document.getElementById('game');
                     speedPowerup = null;
                     speedBoostActive = false;
                     speedBoostTimer = 0;
-                    setGameSpeed(100); // reset speed
+                    setGameSpeed(100);
                     police = [];
                 }
             }
@@ -380,7 +380,7 @@ const canvas = document.getElementById('game');
                 speedBoostTimer--;
                 if (speedBoostTimer <= 0) {
                     speedBoostActive = false;
-                    setGameSpeed(100); // reset to normal speed
+                    setGameSpeed(100);
                 }
             }
 
@@ -460,7 +460,7 @@ const canvas = document.getElementById('game');
         }
 
         let lastInputTime = 0;
-        const inputDelay = 60; // milliseconds
+        const inputDelay = 60;
 
         document.addEventListener('keydown', e => {
             const now = Date.now();
@@ -482,7 +482,7 @@ const canvas = document.getElementById('game');
 
         const volumeBtn = document.getElementById('volumeBtn');
         const bgMusic = document.getElementById('bgMusic');
-        let musicPlaying = false;
+        const soundSelect = document.getElementById('soundSelect');
 
         // autoplay
         window.addEventListener('DOMContentLoaded', () => {
@@ -593,12 +593,12 @@ const canvas = document.getElementById('game');
         };
 
     // 2. Idle Disconnect Logic (Realtime Database)
-    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    const IDLE_TIMEOUT = 5 * 60 * 1000;
     let idleTimer;
 
     function goOffline() {
       console.log("Going offline to save connections...");
-      firebase.database().goOffline(); // For Realtime Database
+      firebase.database().goOffline();
       // For Firestore use: firebase.firestore().disableNetwork();
     }
 
@@ -619,3 +619,31 @@ const canvas = document.getElementById('game');
     );
 
     resetIdleTimer();
+
+    let musicPlaying = false;
+
+    soundSelect.onchange = function() {
+        const wasPlaying = musicPlaying;
+        bgMusic.pause();
+        bgMusic.src = soundSelect.value;
+        bgMusic.load();
+        if (wasPlaying) {
+            bgMusic.play();
+        }
+    };
+
+    // Music note button logic
+    const musicNoteBtn = document.getElementById('musicNoteBtn');
+    const musicPopup = document.getElementById('musicPopup');
+
+    // Toggle popup when music note is clicked
+    musicNoteBtn.onclick = function() {
+        musicPopup.style.display = (musicPopup.style.display === "none" || musicPopup.style.display === "") ? "block" : "none";
+    };
+
+    // Optional: Hide popup when clicking outside
+    document.addEventListener('mousedown', function(e) {
+        if (!musicPopup.contains(e.target) && e.target !== musicNoteBtn) {
+            musicPopup.style.display = "none";
+        }
+    });
