@@ -939,39 +939,39 @@ const menuHighScore = document.getElementById('menuHighScore');
 const menuLeaderboardList = document.getElementById('menuLeaderboardList');
 const difficultyBtns = document.querySelectorAll('.difficultyBtn');
 
-// Show high score and leaderboard in menu
-menuHighScore.textContent = highscore;
-db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snapshot => {
-    const items = [];
-    snapshot.forEach(child => {
-        items.push(child.val());
-    });
-    items.reverse();
-    menuLeaderboardList.innerHTML = '';
-    items.forEach((entry, i) => {
-        const li = document.createElement('li');
-        li.textContent = `${entry.name}: ${entry.score}`;
-        menuLeaderboardList.appendChild(li);
-    });
-});
-
-// Hide main menu and start game with selected difficulty
-difficultyBtns.forEach(btn => {
-    btn.onclick = function() {
-        mainMenu.style.display = "none";
-        paused = false;
-        showPauseMenu(false);
-        setGameSpeed(parseInt(btn.getAttribute('data-speed')));
-    };
-});
-
-// Show main menu on page load, pause game
+// Make sure buttons are clickable by adding event listeners after DOM is loaded
 window.addEventListener('DOMContentLoaded', () => {
+    // Show main menu and pause game
     mainMenu.style.display = "flex";
     paused = true;
     showPauseMenu(false);
-});
 
+    // Show high score and leaderboard in menu
+    menuHighScore.textContent = highscore;
+    db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snapshot => {
+        const items = [];
+        snapshot.forEach(child => {
+            items.push(child.val());
+        });
+        items.reverse();
+        menuLeaderboardList.innerHTML = '';
+        items.forEach((entry, i) => {
+            const li = document.createElement('li');
+            li.textContent = `${entry.name}: ${entry.score}`;
+            menuLeaderboardList.appendChild(li);
+        });
+    });
+
+    // Hide main menu and start game with selected difficulty
+    difficultyBtns.forEach(btn => {
+        btn.onclick = function() {
+            mainMenu.style.display = "none";
+            paused = false;
+            showPauseMenu(false);
+            setGameSpeed(parseInt(btn.getAttribute('data-speed')));
+        };
+    });
+});
 
     // Mobile controls
     const mobileControls = document.getElementById('mobileControls');
