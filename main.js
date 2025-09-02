@@ -30,8 +30,3 @@ setupButton("btn-left", "ArrowLeft");
 setupButton("btn-right", "ArrowRight");
 setupButton("btn-up", "ArrowUp");
 setupButton("btn-down", "ArrowDown");
-document.getElementById('menuBtn').onclick = function() {
-    mainMenu.style.display = "flex";
-    paused = true;
-    showPauseMenu(false);
-};
