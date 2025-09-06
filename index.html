@@ -302,6 +302,24 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Register this player as online
+        const playerSessionId = playerName + "_" + Math.random().toString(36).substr(2, 9);
+        db.ref('playersOnline/' + playerSessionId).set(true);
+
+        // Remove player from online list when leaving
+        window.addEventListener('beforeunload', () => {
+            db.ref('playersOnline/' + playerSessionId).remove();
+        });
+
+        // Update the online player count in real time
+        function updatePlayerCount() {
+            db.ref('playersOnline').on('value', snapshot => {
+                const count = snapshot.numChildren();
+                document.getElementById('playerCountNum').textContent = count;
+            });
+        }
+        updatePlayerCount();
+
         function updateLeaderboard() {
             db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snapshot => {
                 const items = [];
