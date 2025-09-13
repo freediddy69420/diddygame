@@ -16,14 +16,9 @@ const canvas = document.getElementById('game');
         let speedBoostTimer = 0;
         let gameSpeed = 100;
         let gameInterval;
-
-        // Highscore feature
         let highscore = localStorage.getItem('diddyHighScore') ? parseInt(localStorage.getItem('diddyHighScore')) : 0;
         document.getElementById('highscore').textContent = "High Score: " + highscore;
-
-        // Diddy and child representations
         const diddy = "👨🏿";
-        // Child skin options
         const childSkins = [
             "👶🏻", "👶🏼", "👶🏽", "👶🏾", "👶🏿","👶",
             "🧒🏻", "🧒🏼", "🧒🏽", "🧒🏾", "🧒🏿","🧒",
@@ -37,28 +32,20 @@ const canvas = document.getElementById('game');
             ctx.textBaseline = "middle";
             ctx.fillText(emoji, x * gridSize + gridSize/2, y * gridSize + gridSize/2);
         }
-
         let paused = false;
-
         function showPauseMenu(show) {
             document.getElementById('pauseMenu').style.display = show ? 'block' : 'none';
             document.getElementById('pauseToggleBtn').textContent = show ? "▶️" : "⏸️";
         }
-
-        // Pause/Resume toggle button logic
         const pauseToggleBtn = document.getElementById('pauseToggleBtn');
         pauseToggleBtn.onclick = function() {
             paused = !paused;
             showPauseMenu(paused);
         };
-
-        // Resume button in pause menu
         document.getElementById('resumeBtn').onclick = function() {
             paused = false;
             showPauseMenu(false);
         };
-
-        // Firebase config
         const firebaseConfig = {
             apiKey: "apiKey",
             authDomain: "diddygame-dfd89.firebaseapp.com",
@@ -87,16 +74,12 @@ const canvas = document.getElementById('game');
                 });
             });
         }
-
-        // Prompt for player name
         let playerName = localStorage.getItem('diddyPlayerName');
         if (!playerName) {
             playerName = prompt("Enter your name for the leaderboard:") || "Anonymous";
             localStorage.setItem('diddyPlayerName', playerName);
         }
         updateLeaderboard();
-
-        // Place child at random position, not on snake or police
         function placeChild() {
             let valid = false;
             while (!valid) {
@@ -108,8 +91,6 @@ const canvas = document.getElementById('game');
         }
 
         let police = [];
-
-        // Place police at random position, not on snake, child, or powerups
         function placePolice() {
             let valid = false;
             let x, y;
@@ -125,11 +106,7 @@ const canvas = document.getElementById('game');
             }
             police.push({x, y});
         }
-
-        // Randomly spawn police every few ticks
         let policeSpawnCounter = 0;
-
-        // Place power-up at random position, not on snake or child
         function placePowerup() {
             let valid = false;
             while (!valid) {
@@ -140,8 +117,6 @@ const canvas = document.getElementById('game');
                 if (valid) powerup = {x, y};
             }
         }
-
-        // Place invincibility power-up at random position, not on snake or child
         function placeInvincibilityPowerup() {
             let valid = false;
             while (!valid) {
@@ -153,8 +128,6 @@ const canvas = document.getElementById('game');
                 if (valid) invincibilityPowerup = {x, y};
             }
         }
-
-        // Place speed power-up at random position, not on snake, child, or other powerups
         function placeSpeedPowerup() {
             let valid = false;
             while (!valid) {
@@ -170,8 +143,6 @@ const canvas = document.getElementById('game');
 
         let lawyerPowerup = null;
         let lawyerActive = false;
-
-        // Place lawyer power-up at random position, not on snake, child, police, or other powerups
         function placeLawyerPowerup() {
             let valid = false;
             while (!valid) {
@@ -188,7 +159,24 @@ const canvas = document.getElementById('game');
             }
         }
 
-        // Randomly decide to spawn a power-up after child is collected
+        let heartPowerup = null;
+        let extraLives = 0;
+        function placeHeartPowerup() {
+            let valid = false;
+            while (!valid) {
+                const x = Math.floor(Math.random() * tileCount);
+                const y = Math.floor(Math.random() * tileCount);
+                valid = !snake.some(segment => segment.x === x && segment.y === y) &&
+                        !(child.x === x && child.y === y) &&
+                        !(powerup && powerup.x === x && powerup.y === y) &&
+                        !(invincibilityPowerup && invincibilityPowerup.x === x && invincibilityPowerup.y === y) &&
+                        !(speedPowerup && speedPowerup.x === x && speedPowerup.y === y) &&
+                        !(lawyerPowerup && lawyerPowerup.x === x && lawyerPowerup.y === y) &&
+                        !(heartPowerup && heartPowerup.x === x && heartPowerup.y === y) &&
+                        !police.some(p => p.x === x && p.y === y);
+                if (valid) heartPowerup = {x, y};
+            }
+        }
         function maybeSpawnPowerup() {
             if (!powerup && Math.random() < 0.2) { 
                 placePowerup();
@@ -197,17 +185,14 @@ const canvas = document.getElementById('game');
 
         function gameLoop() {
             if (paused) return;
-
-            // Move diddy
+            let died = false; // <-- Add this line
             if (direction.x !== 0 || direction.y !== 0) {
                 const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
                 snake.unshift(head);
-
-                // Check if child touched
                 if (head.x === child.x && head.y === child.y) {
                     let points = 1;
                     if (powerupActive) {
-                        points = 4;
+                        points = 5;
                         powerupActive = false;
                     }
                     score += points;
@@ -219,120 +204,76 @@ const canvas = document.getElementById('game');
                     }
                     placeChild();
                     maybeSpawnPowerup();
-
-                    // Spawn speed powerup at score 25
                     if (score === 25 && !speedPowerup) {
                         placeSpeedPowerup();
                     }
-                    // Spawn invincibility powerup at score 50
                     if (score === 50 && !invincibilityPowerup) {
                         placeInvincibilityPowerup();
                     }
-                    // 0.5% chance to spawn invincibility powerup on any child collection (except score 50)
                     if (score !== 50 && !invincibilityPowerup && Math.random() < 0.005) {
                      placeInvincibilityPowerup();
                     }
-                    // Spawn lawyer powerup at score 30 (always)
                     if (score === 30 && !lawyerPowerup) {
                         placeLawyerPowerup();
                     }
-                    // 1% chance to spawn lawyer on any child collection
                     if (score !== 30 && !lawyerPowerup && Math.random() < 0.01) {
                         placeLawyerPowerup();
+                    }
+                    if (!heartPowerup && Math.random() < 0.0025) {
+                        placeHeartPowerup();
                     }
                 } else if (powerup && head.x === powerup.x && head.y === powerup.y) {
                     powerupActive = true;
                     powerup = null;
                 } else if (speedPowerup && head.x === speedPowerup.x && head.y === speedPowerup.y) {
                     speedBoostActive = true;
-                    speedBoostTimer = 100; // lasts for 100 game ticks (~10 seconds)
+                    speedBoostTimer = 100;
                     speedPowerup = null;
-                    setGameSpeed(gameSpeed / 2); // double speed
+                    setGameSpeed(gameSpeed / 2);
                 } else if (invincibilityPowerup && head.x === invincibilityPowerup.x && head.y === invincibilityPowerup.y) {
                     invincible = true;
-                    invincibilityTimer = 100; // lasts for 100 game ticks (~10 seconds)
+                    invincibilityTimer = 100;
                     invincibilityPowerup = null;
                 } else if (lawyerPowerup && head.x === lawyerPowerup.x && head.y === lawyerPowerup.y) {
                     lawyerActive = true;
                     lawyerPowerup = null;
-                    police = []; // Remove all police
+                    police = [];
+                } else if (heartPowerup && head.x === heartPowerup.x && head.y === heartPowerup.y) {
+                    extraLives += 1;
+                    heartPowerup = null;
                 } else {
                     snake.pop();
                 }
+                let center = {x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)};
+                let hitWall = head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount;
+                let hitSelf = snake.slice(1).some(s => s.x === head.x && s.y === head.y);
+                let hitPolice = police.some(p => p.x === snake[0].x && p.y === snake[0].y);
 
-                // Check collision with walls or self
-                if (
-                    (head.x < 0 || head.x >= tileCount ||
-                    head.y < 0 || head.y >= tileCount)
-                ) {
-                    if (invincible) {
-                        // If invincible, teleport to center instead of game over
-                        snake[0] = {x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)};
+                if (invincible) {
+                    // Invincibility: cannot die from anything!
+                    if (hitWall || hitSelf || hitPolice) {
+                        snake = Array(snake.length).fill().map(() => ({...center}));
                         direction = {x: 0, y: 0};
-                    } else if (snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
-                        // Game over on self collision if not invincible
-                        alert("Game Over! Final Score: " + score);
-
-                        // Submit score to global leaderboard
-                        if (score > 0) {
-                            db.ref('leaderboard').push({
-                                name: playerName,
-                                score: score,
-                                timestamp: Date.now()
-                            });
-                            setTimeout(updateLeaderboard, 500); // Give Firebase time to update
-                        }
-
-                        snake = [{x: 10, y: 10}];
-                        direction = {x: 0, y: 0};
-                        score = 0;
-                        document.getElementById('score').textContent = "Score: 0";
                         placeChild();
-                        powerup = null;
-                        powerupActive = false;
-                        invincibilityPowerup = null;
-                        invincible = false;
-                        invincibilityTimer = 0;
-                        speedPowerup = null;
-                        speedBoostActive = false;
-                        speedBoostTimer = 0;
-                        setGameSpeed(100);
                         police = [];
-                    } else {
-                        // Game over on wall collision if not invincible
-                        alert("Game Over! Final Score: " + score);
-
-                        // Submit score to global leaderboard
-                        if (score > 0) {
-                            db.ref('leaderboard').push({
-                                name: playerName,
-                                score: score,
-                                timestamp: Date.now()
-                            });
-                            setTimeout(updateLeaderboard, 500); // Give Firebase time to update
-                        }
-
-                        snake = [{x: 10, y: 10}];
-                        direction = {x: 0, y: 0};
-                        score = 0;
-                        document.getElementById('score').textContent = "Score: 0";
-                        placeChild();
-                        powerup = null;
-                        powerupActive = false;
-                        invincibilityPowerup = null;
-                        invincible = false;
-                        invincibilityTimer = 0;
-                        speedPowerup = null;
-                        speedBoostActive = false;
-                        speedBoostTimer = 0;
-                        setGameSpeed(100); // reset speed
-                        police = [];
+                        return;
                     }
-                } else if (!invincible && snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
-                    // Game over on self collision if not invincible
+                } else if (lawyerActive && hitPolice) {
+                    // Lawyer: protects from police, consumed after use
+                    police = [];
+                    lawyerActive = false;
+                    return;
+                } else if (extraLives > 0 && (hitWall || hitSelf || hitPolice)) {
+                    // Extra life: respawn in center, lose one life
+                    extraLives -= 1;
+                    snake = [{...center}];
+                    direction = {x: 0, y: 0};
+                    placeChild();
+                    alert("You used an extra life! Respawning in the middle.");
+                    return;
+                } else if (hitWall || hitSelf || hitPolice) {
+                    // Normal death/game over logic
                     alert("Game Over! Final Score: " + score);
-
-                    // Submit score to global leaderboard
                     if (score > 0) {
                         db.ref('leaderboard').push({
                             name: playerName,
@@ -341,7 +282,6 @@ const canvas = document.getElementById('game');
                         });
                         setTimeout(updateLeaderboard, 500);
                     }
-
                     snake = [{x: 10, y: 10}];
                     direction = {x: 0, y: 0};
                     score = 0;
@@ -355,27 +295,26 @@ const canvas = document.getElementById('game');
                     speedPowerup = null;
                     speedBoostActive = false;
                     speedBoostTimer = 0;
-                    setGameSpeed(100);
                     police = [];
+                    lawyerPowerup = null;
+                    lawyerActive = false;
+                    heartPowerup = null;
+                    extraLives = 0;
+                    setGameSpeed(100);
+                    return;
                 }
             }
-
-            // Police spawn logic
             policeSpawnCounter++;
-            if (policeSpawnCounter > 30 && Math.random() < 0.05 && police.length < 6) { // ~every 30 ticks, 5% chance, max 6 police
+            if (policeSpawnCounter > 30 && Math.random() < 0.05 && police.length < 6) {
                 placePolice();
                 policeSpawnCounter = 0;
             }
-
-            // Handle invincibility timer
             if (invincible) {
                 invincibilityTimer--;
                 if (invincibilityTimer <= 0) {
-                    invincible = false;
+                    invincible = false; // Powerup expired, you can die again
                 }
             }
-
-            // Handle speed boost timer
             if (speedBoostActive) {
                 speedBoostTimer--;
                 if (speedBoostTimer <= 0) {
@@ -383,14 +322,13 @@ const canvas = document.getElementById('game');
                     setGameSpeed(100);
                 }
             }
-
-            // Draw everything
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawTile(child.x, child.y, childEmoji);
             if (powerup) drawTile(powerup.x, powerup.y, "🧴");
             if (speedPowerup) drawTile(speedPowerup.x, speedPowerup.y, "⚡");
             if (invincibilityPowerup) drawTile(invincibilityPowerup.x, invincibilityPowerup.y, "🛡️");
             if (lawyerPowerup) drawTile(lawyerPowerup.x, lawyerPowerup.y, "🧑🏻‍⚖️");
+            if (heartPowerup) drawTile(heartPowerup.x, heartPowerup.y, "❤️");
             snake.forEach((segment, i) => {
                 drawTile(segment.x, segment.y, diddy);
             });
@@ -409,18 +347,27 @@ const canvas = document.getElementById('game');
                 ctx.restore();
             }
             police.forEach(p => drawTile(p.x, p.y, "👮‍♂️"));
-
-            // Check collision with police
             if (police.some(p => p.x === snake[0].x && p.y === snake[0].y)) {
-                if (lawyerActive || invincible) {
-                    // If lawyer or invincibility is active, protect once and remove all police
-                    lawyerActive = false;
-                    invincible = false;
+                if (lawyerActive) {
+                    // Remove all police and consume the lawyer powerup, do NOT die
                     police = [];
+                    lawyerActive = false;
+                    // Optionally show a message
+                    alert("Protected by lawyer! All police removed.");
+                    // Continue the game, do not return or trigger game over
+                } else if (invincible) {
+                    // Already handled by invincibility logic
+                    police = [];
+                    // Continue the game
+                } else if (extraLives > 0) {
+                    extraLives -= 1;
+                    snake = [{x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)}];
+                    direction = {x: 0, y: 0};
+                    placeChild();
+                    alert("You used an extra life! Respawning in the middle.");
                 } else {
+                    // Normal death/game over logic
                     alert("Game Over! The police caught Diddy! Final Score: " + score);
-
-                    // Submit score to leaderboard
                     if (score > 0) {
                         db.ref('leaderboard').push({
                             name: playerName,
@@ -429,7 +376,6 @@ const canvas = document.getElementById('game');
                         });
                         setTimeout(updateLeaderboard, 500);
                     }
-
                     snake = [{x: 10, y: 10}];
                     direction = {x: 0, y: 0};
                     score = 0;
@@ -446,51 +392,49 @@ const canvas = document.getElementById('game');
                     police = [];
                     lawyerPowerup = null;
                     lawyerActive = false;
+                    heartPowerup = null;
+                    extraLives = 0;
                     setGameSpeed(100);
                     return;
                 }
             }
+            if (died) {
+                snake = [{x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)}];
+                direction = {x: 0, y: 0};
+                placeChild();
+                return;
+            }
         }
-
-        // change game speed
         function setGameSpeed(ms) {
             gameSpeed = ms;
             clearInterval(gameInterval);
             gameInterval = setInterval(gameLoop, gameSpeed);
         }
-
         let lastInputTime = 0;
         const inputDelay = 60;
-
         document.addEventListener('keydown', e => {
             const now = Date.now();
-            if (now - lastInputTime < inputDelay) return; // Ignore if not enough time has passed
+            if (now - lastInputTime < inputDelay) return;
             lastInputTime = now;
-
             if (e.key === "Escape") {
                 paused = !paused;
                 showPauseMenu(paused);
             }
             if (!paused) {
-                // Arrow keys and WASD
                 if ((e.key === "ArrowUp" || e.key === "w" || e.key === "W") && direction.y !== 1) direction = {x: 0, y: -1};
                 else if ((e.key === "ArrowDown" || e.key === "s" || e.key === "S") && direction.y !== -1) direction = {x: 0, y: 1};
                 else if ((e.key === "ArrowLeft" || e.key === "a" || e.key === "A") && direction.x !== 1) direction = {x: -1, y: 0};
                 else if ((e.key === "ArrowRight" || e.key === "d" || e.key === "D") && direction.x !== -1) direction = {x: 1, y: 0};
             }
         });
-
         const volumeBtn = document.getElementById('volumeBtn');
         const bgMusic = document.getElementById('bgMusic');
         const soundSelect = document.getElementById('soundSelect');
-
-        // autoplay
         window.addEventListener('DOMContentLoaded', () => {
             bgMusic.play().then(() => {
                 volumeBtn.textContent = "🔊";
                 musicPlaying = true;
             }).catch(() => {
-                // Autoplay blocked
                 const startMusic = () => {
                     bgMusic.play();
                     volumeBtn.textContent = "🔊";
@@ -502,8 +446,6 @@ const canvas = document.getElementById('game');
                 window.addEventListener('mousedown', startMusic);
             });
         });
-
-        // volume button
         volumeBtn.onclick = function() {
             if (!musicPlaying) {
                 bgMusic.play();
@@ -515,8 +457,6 @@ const canvas = document.getElementById('game');
                 musicPlaying = false;
             }
         };
-
-        // update icon if music is paused
         bgMusic.onpause = function() {
             volumeBtn.textContent = "🔇";
             musicPlaying = false;
@@ -525,11 +465,9 @@ const canvas = document.getElementById('game');
             volumeBtn.textContent = "🔊";
             musicPlaying = true;
         };
-
         const modeBtn = document.getElementById('modeBtn');
         const modeEmoji = document.getElementById('modeEmoji');
         let darkMode = true;
-
         modeBtn.onclick = function() {
             darkMode = !darkMode;
             if (darkMode) {
@@ -554,14 +492,8 @@ const canvas = document.getElementById('game');
                 modeEmoji.textContent = "☀️";
             }
         };
-
-        // Replace initial child placement with function call
         placeChild();
-
-        // Start game loop with interval
         gameInterval = setInterval(gameLoop, gameSpeed);
-
-        // skins
         const skinBtn = document.createElement('button');
         skinBtn.id = "skinBtn";
         skinBtn.style.position = "absolute";
@@ -575,53 +507,39 @@ const canvas = document.getElementById('game');
         skinBtn.style.outline = "none";
         skinBtn.textContent = childEmoji;
         document.body.appendChild(skinBtn);
-
         skinBtn.onclick = function() {
             childSkinIndex = (childSkinIndex + 1) % childSkins.length;
             childEmoji = childSkins[childSkinIndex];
             skinBtn.textContent = childEmoji;
         };
-
         const fullscreenBtn = document.getElementById('fullscreenBtn');
         fullscreenBtn.onclick = function() {
-            // Fullscreen only the canvas
             if (!document.fullscreenElement) {
                 canvas.requestFullscreen();
             } else {
                 document.exitFullscreen();
             }
         };
-
-    // 2. Idle Disconnect Logic (Realtime Database)
     const IDLE_TIMEOUT = 5 * 60 * 1000;
     let idleTimer;
-
     function goOffline() {
       console.log("Going offline to save connections...");
       firebase.database().goOffline();
-      // For Firestore use: firebase.firestore().disableNetwork();
     }
-
     function goOnline() {
       console.log("Reconnecting to Firebase...");
-      firebase.database().goOnline(); // For Realtime Database
-      // For Firestore use: firebase.firestore().enableNetwork();
+      firebase.database().goOnline();
     }
-
     function resetIdleTimer() {
       clearTimeout(idleTimer);
       goOnline();
       idleTimer = setTimeout(goOffline, IDLE_TIMEOUT);
     }
-
     ["mousemove", "keydown", "touchstart", "click"].forEach(event =>
       window.addEventListener(event, resetIdleTimer)
     );
-
     resetIdleTimer();
-
     let musicPlaying = false;
-
     soundSelect.onchange = function() {
         const wasPlaying = musicPlaying;
         bgMusic.pause();
@@ -631,19 +549,36 @@ const canvas = document.getElementById('game');
             bgMusic.play();
         }
     };
-
-    // Music note button logic
     const musicNoteBtn = document.getElementById('musicNoteBtn');
     const musicPopup = document.getElementById('musicPopup');
-
-    // Toggle popup when music note is clicked
     musicNoteBtn.onclick = function() {
         musicPopup.style.display = (musicPopup.style.display === "none" || musicPopup.style.display === "") ? "block" : "none";
     };
-
-    // Optional: Hide popup when clicking outside
     document.addEventListener('mousedown', function(e) {
         if (!musicPopup.contains(e.target) && e.target !== musicNoteBtn) {
             musicPopup.style.display = "none";
         }
     });
+    const mobileControls = document.getElementById('mobileControls');
+    const mcUp = document.getElementById('mc-up');
+    const mcDown = document.getElementById('mc-down');
+    const mcLeft = document.getElementById('mc-left');
+    const mcRight = document.getElementById('mc-right');
+    function toggleMobileControls(show) {
+      mobileControls.style.display = show ? 'block' : 'none';
+    }
+    if ('ontouchstart' in window) {
+      toggleMobileControls(true);
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+      }, { passive: false });
+      mcUp.addEventListener('touchstart', () => { direction = {x: 0, y: -1}; });
+      mcDown.addEventListener('touchstart', () => { direction = {x: 0, y: 1}; });
+      mcLeft.addEventListener('touchstart', () => { direction = {x: -1, y: 0}; });
+      mcRight.addEventListener('touchstart', () => { direction = {x: 1, y: 0}; });
+      if (window.navigator.userAgent.indexOf("Safari") !== -1) {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 0);
+      }
+    }
