@@ -10,7 +10,7 @@ https://ashton20271.github.io/diddygame/
 
 https://freediddy69420.github.io/diddygame/
 
-[![extention](https://img.shields.io/github/downloads/Ashton20271/diddygame/total.svg)](https://github.com/Ashton20271/diddygame/releases/latest) <- Click this to download the extention
+[![extention](https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
 # Powerups
 🍼=x5 points for next child
 
