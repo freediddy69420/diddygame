@@ -762,25 +762,6 @@
                 document.exitFullscreen();
             }
         };
-    const IDLE_TIMEOUT = 5 * 60 * 1000;
-    let idleTimer;
-    function goOffline() {
-      console.log("Going offline to save connections...");
-      firebase.database().goOffline();
-    }
-    function goOnline() {
-      console.log("Reconnecting to Firebase...");
-      firebase.database().goOnline();
-    }
-    function resetIdleTimer() {
-      clearTimeout(idleTimer);
-      goOnline();
-      idleTimer = setTimeout(goOffline, IDLE_TIMEOUT);
-    }
-    ["mousemove", "keydown", "touchstart", "click"].forEach(event =>
-      window.addEventListener(event, resetIdleTimer)
-    );
-    resetIdleTimer();
     let musicPlaying = false;
     soundSelect.onchange = function() {
         const wasPlaying = musicPlaying;
