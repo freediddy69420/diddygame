@@ -28,4 +28,3 @@ setupButton("btn-left", "ArrowLeft");
 setupButton("btn-right", "ArrowRight");
 setupButton("btn-up", "ArrowUp");
 setupButton("btn-down", "ArrowDown");
-setupButton("btn-down", "ArrowDown");
