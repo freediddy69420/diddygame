@@ -91,6 +91,31 @@ const canvas = document.getElementById('game');
         }
 
         let police = [];
+        let policeChasingUntil = 0;
+        let lastPoliceMove = 0;
+        let playerMoved = false;
+        function movePoliceIfChasing() {
+            const now = Date.now();
+            if (now < policeChasingUntil && police.length > 0 && snake.length > 0) {
+                const policeMoveCooldown = Math.max(50, gameSpeed * 2);
+                if (now - lastPoliceMove < policeMoveCooldown) return;
+                lastPoliceMove = now;
+ 
+                const head = snake[0];
+                police.forEach(p => {
+                    const dx = head.x - p.x;
+                    const dy = head.y - p.y;
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        p.x += Math.sign(dx);
+                    } else if (Math.abs(dy) > 0) {
+                        p.y += Math.sign(dy);
+                    }
+                    p.x = Math.max(0, Math.min(tileCount - 1, p.x));
+                    p.y = Math.max(0, Math.min(tileCount - 1, p.y));
+                });
+            }
+        }
+        setInterval(movePoliceIfChasing, 50);
         function placePolice() {
             let valid = false;
             let x, y;
@@ -185,10 +210,21 @@ const canvas = document.getElementById('game');
 
         function gameLoop() {
             if (paused) return;
-            let died = false; // <-- Add this line
+            let died = false;
+            const prevPolicePos = new Set(police.map(p => `${p.x},${p.y}`));
             if (direction.x !== 0 || direction.y !== 0) {
                 const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
                 snake.unshift(head);
+                 playerMoved = true;
+
+                for (let p of police) {
+                    const dx = Math.abs(p.x - head.x);
+                    const dy = Math.abs(p.y - head.y);
+                    if (Math.max(dx, dy) === 1 && !(p.x === head.x && p.y === head.y)) {
+                        policeChasingUntil = Date.now() + 5000;
+                        break;
+                    }
+                }
                 if (head.x === child.x && head.y === child.y) {
                     let points = 1;
                     if (powerupActive) {
@@ -250,7 +286,6 @@ const canvas = document.getElementById('game');
                 let hitPolice = police.some(p => p.x === snake[0].x && p.y === snake[0].y);
 
                 if (invincible) {
-                    // Invincibility: cannot die from anything!
                     if (hitWall || hitSelf || hitPolice) {
                         snake = Array(snake.length).fill().map(() => ({...center}));
                         direction = {x: 0, y: 0};
@@ -259,12 +294,10 @@ const canvas = document.getElementById('game');
                         return;
                     }
                 } else if (lawyerActive && hitPolice) {
-                    // Lawyer: protects from police, consumed after use
                     police = [];
                     lawyerActive = false;
                     return;
                 } else if (extraLives > 0 && (hitWall || hitSelf || hitPolice)) {
-                    // Extra life: respawn in center, lose one life
                     extraLives -= 1;
                     snake = [{...center}];
                     direction = {x: 0, y: 0};
@@ -272,7 +305,6 @@ const canvas = document.getElementById('game');
                     alert("You used an extra life! Respawning in the middle.");
                     return;
                 } else if (hitWall || hitSelf || hitPolice) {
-                    // Normal death/game over logic
                     alert("Game Over! Final Score: " + score);
                     if (score > 0) {
                         db.ref('leaderboard').push({
@@ -312,7 +344,7 @@ const canvas = document.getElementById('game');
             if (invincible) {
                 invincibilityTimer--;
                 if (invincibilityTimer <= 0) {
-                    invincible = false; // Powerup expired, you can die again
+                    invincible = false;
                 }
             }
             if (speedBoostActive) {
@@ -347,18 +379,17 @@ const canvas = document.getElementById('game');
                 ctx.restore();
             }
             police.forEach(p => drawTile(p.x, p.y, "👮‍♂️"));
-            if (police.some(p => p.x === snake[0].x && p.y === snake[0].y)) {
+            // compute whether a police unit is currently on the head
+            const policeOnHeadNow = police.some(p => p.x === snake[0].x && p.y === snake[0].y);
+            // check whether a police unit was already on that position before the player's last move
+            const policeWasThereBeforeMove = prevPolicePos.has(`${snake[0].x},${snake[0].y}`);
+            if (playerMoved && policeOnHeadNow) {
                 if (lawyerActive) {
-                    // Remove all police and consume the lawyer powerup, do NOT die
                     police = [];
                     lawyerActive = false;
-                    // Optionally show a message
                     alert("Protected by lawyer! All police removed.");
-                    // Continue the game, do not return or trigger game over
                 } else if (invincible) {
-                    // Already handled by invincibility logic
                     police = [];
-                    // Continue the game
                 } else if (extraLives > 0) {
                     extraLives -= 1;
                     snake = [{x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)}];
@@ -366,45 +397,24 @@ const canvas = document.getElementById('game');
                     placeChild();
                     alert("You used an extra life! Respawning in the middle.");
                 } else {
-                    // Normal death/game over logic
-                    alert("Game Over! The police caught Diddy! Final Score: " + score);
-                    if (score > 0) {
-                        db.ref('leaderboard').push({
-                            name: playerName,
-                            score: score,
-                            timestamp: Date.now()
-                        });
-                        setTimeout(updateLeaderboard, 500);
-                    }
-                    snake = [{x: 10, y: 10}];
-                    direction = {x: 0, y: 0};
-                    score = 0;
-                    document.getElementById('score').textContent = "Score: 0";
-                    placeChild();
-                    powerup = null;
-                    powerupActive = false;
-                    invincibilityPowerup = null;
-                    invincible = false;
-                    invincibilityTimer = 0;
-                    speedPowerup = null;
-                    speedBoostActive = false;
-                    speedBoostTimer = 0;
-                    police = [];
-                    lawyerPowerup = null;
-                    lawyerActive = false;
-                    heartPowerup = null;
-                    extraLives = 0;
-                    setGameSpeed(100);
-                    return;
+                     died = true;
                 }
-            }
-            if (died) {
-                snake = [{x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)}];
-                direction = {x: 0, y: 0};
-                placeChild();
-                return;
-            }
-        }
+            } else if (policeOnHeadNow && !policeWasThereBeforeMove) {
+                if (lawyerActive) {
+                    police = [];
+                    lawyerActive = false;
+                    } else if (invincible) {
+                    police = [];
+                }
+             }
+             playerMoved = false;
+             if (died) {
+                 snake = [{x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)}];
+                 direction = {x: 0, y: 0};
+                 placeChild();
+                 return;
+             }
+         }
         function setGameSpeed(ms) {
             gameSpeed = ms;
             clearInterval(gameInterval);
@@ -520,35 +530,6 @@ const canvas = document.getElementById('game');
                 document.exitFullscreen();
             }
         };
-    const IDLE_TIMEOUT = 5 * 60 * 1000;
-    let idleTimer;
-    function goOffline() {
-      console.log("Going offline to save connections...");
-      firebase.database().goOffline();
-    }
-    function goOnline() {
-      console.log("Reconnecting to Firebase...");
-      firebase.database().goOnline();
-    }
-    function resetIdleTimer() {
-      clearTimeout(idleTimer);
-      goOnline();
-      idleTimer = setTimeout(goOffline, IDLE_TIMEOUT);
-    }
-    ["mousemove", "keydown", "touchstart", "click"].forEach(event =>
-      window.addEventListener(event, resetIdleTimer)
-    );
-    resetIdleTimer();
-    let musicPlaying = false;
-    soundSelect.onchange = function() {
-        const wasPlaying = musicPlaying;
-        bgMusic.pause();
-        bgMusic.src = soundSelect.value;
-        bgMusic.load();
-        if (wasPlaying) {
-            bgMusic.play();
-        }
-    };
     const musicNoteBtn = document.getElementById('musicNoteBtn');
     const musicPopup = document.getElementById('musicPopup');
     musicNoteBtn.onclick = function() {
