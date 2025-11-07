@@ -6,8 +6,6 @@ https://diddygame.vercel.app/
 
 https://diddygame.netlify.app/
 
-https://ashton20271.github.io/diddygame/
-
 https://freediddy69420.github.io/diddygame/
 
 [![extention](https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
