@@ -59,6 +59,7 @@
         #downloadBtn,
         #volumeBtn,
         #modeBtn,
+        #discordBtn,
         #fullscreenBtn,
         #skinBtn,
         #pauseToggleBtn {
@@ -72,6 +73,7 @@
         #volumeBtn:hover,
         #modeBtn:hover,
         #fullscreenBtn:hover,
+        #discordBtn:hover
         #skinBtn:hover,
         #pauseToggleBtn:hover {
             transform: scale(1.12);
@@ -90,8 +92,35 @@
         display: flex;
         align-items: center;
         text-decoration: none;
+        transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
     }
-    .top-button img{ display:block; }
+    .top-button img{ display:block; transition: transform 0.14s ease, filter 0.14s ease; }
+
+    #discordBtn:hover {
+        transform: translateY(-4px) scale(1.06);
+        box-shadow: 0 8px 24px rgba(88,101,242,0.14);
+        background: rgba(88,101,242,0.03);
+        border-radius: 8px;
+    }
+    #discordBtn:hover img {
+        transform: scale(1.12);
+        filter: drop-shadow(0 6px 18px rgba(88,101,242,0.18)) saturate(1.1);
+    }
+
+    #chromeWebStoreBtn:hover {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 10px 28px rgba(0,195,255,0.12);
+        background: rgba(255,255,255,0.02);
+        border-radius: 8px;
+    }
+    #chromeWebStoreBtn img {
+        border-radius: 6px;
+    }
+    #chromeWebStoreBtn:hover img {
+        transform: scale(1.08);
+        filter: none;
+    }
+
     </style>
 </head>
 <body>
@@ -99,13 +128,12 @@
         <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" style="width:32px;height:32px;border-radius:50%;">
     </a>
 
-    <a href="https://discord.gg/v8ytjKQD" target="_blank" id="discordBtn" class="top-button" style="left:64px;">
+    <a href="discord/" target="_blank" id="discordBtn" class="top-button" style="left:64px;">
         <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/discord.svg" alt="Discord" style="width:32px;height:32px;">
     </a>
 
     <a href="extensiondownload.html" target="_blank" id="chromeWebStoreBtn" class="top-button" style="left:108px;">
         <img src="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg" alt="Chrome Web Store" style="width:32px;height:32px;border-radius:8px;">
-        <span style="color:#fff; font-size:14px; margin-left:8px; display:inline-block; vertical-align:middle;">Download</span>
     </a>
     <h1 style="color:#fff;">Diddy Game</h1>
     <div id="mainWrapper">
