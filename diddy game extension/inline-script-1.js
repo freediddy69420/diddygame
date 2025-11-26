@@ -563,3 +563,16 @@ const canvas = document.getElementById('game');
         }, 0);
       }
     }
+
+
+// Music selector fix
+try {
+  const soundSelect = document.getElementById("soundSelect");
+  if (soundSelect && bgMusic) {
+    soundSelect.addEventListener("change", () => {
+      const choice = soundSelect.value;
+      bgMusic.src = choice;
+      bgMusic.play().catch(()=>{});
+    });
+  }
+} catch(e){}

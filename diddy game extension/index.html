@@ -76,9 +76,32 @@
             filter: brightness(1.2);
             background: rgba(255,255,255,0.08);
         }
-    </style>
+    
+    .discord-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      padding: 8px 12px;
+      background:#5865F2;
+      color:white;
+      text-decoration:none;
+      border-radius:8px;
+      transition:0.2s;
+      font-family:inherit;
+      z-index:9999;
+    }
+    .discord-btn:hover { background:#4752C4; transform:translateY(-2px); }
+
+</style>
 </head>
 <body>
+<a class="discord-btn" href="/discord.html">
+  <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/discord.svg"
+       alt="Discord"
+       style="width:20px;height:20px;vertical-align:middle;margin-right:8px;filter:invert(1) brightness(2);">
+  Discord
+</a>
+
     <h1 style="color:#fff;">Diddy Game</h1>
     <div id="mainWrapper">
         <div id="sidebar">
