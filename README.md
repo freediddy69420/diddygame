@@ -13,7 +13,7 @@ https://diddygame.github.io
 
 [![extention](https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
 
-https://chart.chrome-stats.com/render?width=640&height=480&version=1&title=Users&labels=%5B%2211-23%22%2C%2211-24%22%2C%2211-25%22%2C%2211-26%22%2C%2211-27%22%2C%2211-28%22%2C%2211-29%22%2C%2211-30%22%5D&values=%5B301%2Cnull%2Cnull%2C310%2C313%2C284%2C276%2C255%5D
+[![chart](https://chart.chrome-stats.com/render?width=640&height=480&version=1&title=Users&labels=%5B%2211-23%22%2C%2211-24%22%2C%2211-25%22%2C%2211-26%22%2C%2211-27%22%2C%2211-28%22%2C%2211-29%22%2C%2211-30%22%5D&values=%5B301%2Cnull%2Cnull%2C310%2C313%2C284%2C276%2C255%5D)
 
 # Powerups
 🍼=x5 points for next child
