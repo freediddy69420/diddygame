@@ -221,7 +221,9 @@ const canvas = document.getElementById('game');
                     const dx = Math.abs(p.x - head.x);
                     const dy = Math.abs(p.y - head.y);
                     if (Math.max(dx, dy) === 1 && !(p.x === head.x && p.y === head.y)) {
-                        policeChasingUntil = Date.now() + 5000;
+                        setTimeout(() => {
+                            policeChasingUntil = Date.now() + 5000;
+                        }, 250);
                         break;
                     }
                 }
