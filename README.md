@@ -13,8 +13,6 @@ https://diddygame.github.io
 
 [![extention](https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
 
-https://chrome-stats.com/embed/bfjbmoglpfpbkaneffbihgnogdibgfpf/trends
-
 # Powerups
 🍼=x5 points for next child
 
