@@ -11,7 +11,7 @@ https://freediddy69420.github.io/diddygame/
 https://diddygame.github.io
 # Extension
 
-[![extention](https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
+[![extention](https://static.chrome-stats.com/icons/chrome-web-store.webp)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
 
 # Powerups
 🍼=x5 points for next child
