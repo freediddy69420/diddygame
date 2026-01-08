@@ -356,6 +356,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script>
+        let modalOpen = false;
+
         function showCustomAlert(message) {
             const modal = document.getElementById('customModal');
             const overlay = document.getElementById('modalOverlay');
@@ -365,10 +367,12 @@
             messageEl.textContent = message;
             modal.classList.add('show');
             overlay.classList.add('show');
+            modalOpen = true;
 
             const closeModal = function() {
                 modal.classList.remove('show');
                 overlay.classList.remove('show');
+                modalOpen = false;
                 document.removeEventListener('keydown', handleEnter);
             };
 
@@ -376,7 +380,7 @@
             overlay.onclick = closeModal;
 
             const handleEnter = function(e) {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' || e.key === 'Escape') {
                     closeModal();
                 }
             };
@@ -854,6 +858,7 @@
         let lastInputTime = 0;
         const inputDelay = 60;
         document.addEventListener('keydown', e => {
+            if (modalOpen) return;
             const now = Date.now();
             if (now - lastInputTime < inputDelay) return;
             lastInputTime = now;
