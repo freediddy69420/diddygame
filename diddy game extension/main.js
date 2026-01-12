@@ -5,7 +5,6 @@ function triggerKey(code, type = "keydown") {
 function setupButton(id, key) {
   const btn = document.getElementById(id);
 
-  // Touch support
   btn.addEventListener("touchstart", e => {
     e.preventDefault();
     triggerKey(key, "keydown");
@@ -15,7 +14,6 @@ function setupButton(id, key) {
     triggerKey(key, "keyup");
   });
 
-  // Mouse support (for desktop clicks)
   btn.addEventListener("mousedown", e => {
     e.preventDefault();
     triggerKey(key, "keydown");

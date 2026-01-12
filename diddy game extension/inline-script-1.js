@@ -76,10 +76,14 @@ const canvas = document.getElementById('game');
         }
         let playerName = localStorage.getItem('diddyPlayerName');
         if (!playerName) {
-            playerName = prompt("Enter your name for the leaderboard:") || "Anonymous";
-            localStorage.setItem('diddyPlayerName', playerName);
+            (async () => {
+                playerName = await showCustomInput("Enter your name for the leaderboard:") || "Anonymous";
+                localStorage.setItem('diddyPlayerName', playerName);
+                updateLeaderboard();
+            })();
+        } else {
+            updateLeaderboard();
         }
-        updateLeaderboard();
         function placeChild() {
             let valid = false;
             while (!valid) {
@@ -304,10 +308,10 @@ const canvas = document.getElementById('game');
                     snake = [{...center}];
                     direction = {x: 0, y: 0};
                     placeChild();
-                    alert("You used an extra life! Respawning in the middle.");
+                    showCustomAlert("You used an extra life! Respawning in the middle.");
                     return;
                 } else if (hitWall || hitSelf || hitPolice) {
-                    alert("Game Over! Final Score: " + score);
+                    showCustomAlert("Game Over! Final Score: " + score);
                     if (score > 0) {
                         db.ref('leaderboard').push({
                             name: playerName,
@@ -389,7 +393,7 @@ const canvas = document.getElementById('game');
                 if (lawyerActive) {
                     police = [];
                     lawyerActive = false;
-                    alert("Protected by lawyer! All police removed.");
+                    showCustomAlert("Protected by lawyer! All police removed.");
                 } else if (invincible) {
                     police = [];
                 } else if (extraLives > 0) {
@@ -397,7 +401,7 @@ const canvas = document.getElementById('game');
                     snake = [{x: Math.floor(tileCount/2), y: Math.floor(tileCount/2)}];
                     direction = {x: 0, y: 0};
                     placeChild();
-                    alert("You used an extra life! Respawning in the middle.");
+                    showCustomAlert("You used an extra life! Respawning in the middle.");
                 } else {
                      died = true;
                 }
@@ -425,9 +429,10 @@ const canvas = document.getElementById('game');
         let lastInputTime = 0;
         const inputDelay = 60;
         document.addEventListener('keydown', e => {
-            const now = Date.now();
-            if (now - lastInputTime < inputDelay) return;
-            lastInputTime = now;
+                    const now = Date.now();
+                    if (window.modalActive) return;
+                    if (now - lastInputTime < inputDelay) return;
+                    lastInputTime = now;
             if (e.key === "Escape") {
                 paused = !paused;
                 showPauseMenu(paused);

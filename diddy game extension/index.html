@@ -91,6 +91,68 @@
       z-index:9999;
     }
     .discord-btn:hover { background:#4752C4; transform:translateY(-2px); }
+    .custom-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #333;
+        color: #fff;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        z-index: 10000;
+        min-width: 300px;
+        text-align: center;
+        font-size: 18px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .custom-modal.show {
+        display: block;
+    }
+
+    .custom-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .custom-modal-overlay.show {
+        display: block;
+    }
+
+    .custom-modal-button {
+        margin-top: 20px;
+        padding: 10px 30px;
+        background: #444;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .custom-modal-button:hover {
+        background: #555;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
 
 </style>
 </head>
@@ -229,8 +291,35 @@
         </select>
     </div>
     <audio id="bgMusic" src="music.mp3" loop></audio>
+        <div id="modalOverlay" class="custom-modal-overlay"></div>
+    <div id="customModal" class="custom-modal">
+        <div id="modalMessage"></div>
+        <button id="modalButton" class="custom-modal-button">OK</button>
+    </div>
+    <div id="inputModalOverlay" class="custom-modal-overlay"></div>
+    <div id="inputModal" class="custom-modal">
+        <div id="inputModalMessage"></div>
+        <input type="text" id="inputModalField" placeholder="Enter your name" style="
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: #222;
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+        ">
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="inputModalSubmit" class="custom-modal-button">Submit</button>
+            <button id="inputModalCancel" class="custom-modal-button">Cancel</button>
+        </div>
+    </div>
+
     <script src="libs/firebase-app-compat.js"></script>
     <script src="libs/firebase-database-compat.js"></script>
+    <script src="modal-helpers.js"></script>
     <script src="inline-script-1.js"></script>
 <div class="mobile-controls">
   <button id="btn-left">⬅</button>
