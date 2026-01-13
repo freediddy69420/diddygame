@@ -7,8 +7,6 @@ https://diddygame.vercel.app/
 https://diddygame.netlify.app/
 
 https://freediddy69420.github.io/diddygame/
-
-https://diddygame.github.io
 # Extension
 
 [![extention](https://static.chrome-stats.com/icons/chrome-web-store.webp)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
