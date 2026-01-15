@@ -828,8 +828,10 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
             }
-            police.forEach(p => drawTile(p.x, p.y, "👮‍♂️"));
-            if (playerMoved && police.some(p => p.x === snake[0].x && p.y === snake[0].y)) {
+            police.forEach(p => drawTile(p.x, p.y, "👮‍♂️"))
+            const policeOnHeadNow = police.some(p => p.x === snake[0].x && p.y === snake[0].y);
+            const policeWasThereBeforeMove = prevPolicePos.has(`${snake[0].x},${snake[0].y}`);
+            if (playerMoved && policeOnHeadNow) {
                 if (lawyerActive) {
                     police = [];
                     lawyerActive = false;
