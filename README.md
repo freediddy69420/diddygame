@@ -7,6 +7,8 @@ https://diddygame.vercel.app/
 https://diddygame.netlify.app/
 
 https://freediddy69420.github.io/diddygame/
+
+https://1458740388087988348.discordsays.com/ (leaderboard broken)
 # Extension
 
 [![extention](https://static.chrome-stats.com/icons/chrome-web-store.webp)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
