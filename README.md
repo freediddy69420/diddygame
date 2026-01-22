@@ -9,6 +9,8 @@ https://diddygame.netlify.app/
 https://freediddy69420.github.io/diddygame/
 
 https://1458740388087988348.discordsays.com/ (leaderboard broken)
+
+https://diddygame.neocities.org/ (no music as its a free account)
 # Extension
 
 [![extention](https://static.chrome-stats.com/icons/chrome-web-store.webp)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
