@@ -13,6 +13,52 @@ https://1458740388087988348.discordsays.com/ (leaderboard broken)
 https://diddygame.neocities.org/ (no music as its a free account)
 
 https://diddygame.gt.tc/
+
+https://diddygame.ct.ws/
+
+https://diddygame.kesug.com
+
+https://diddygame.web1337.net/
+
+https://diddygame.gamer.gd/
+
+https://www.diddygame.infinityfreeapp.com
+
+https://diddygame.wuaze.com/
+
+https://diddygame.page.gd/
+
+https://diddygame.free.nf/
+
+https://diddygame.10001mb.com/
+
+https://diddygame.xo.je/
+
+https://diddygame.lovestoblog.com/
+
+https://diddygame.rf.gd/
+
+https://diddygame.fwh.is/
+
+https://diddygame.great-site.net/
+
+https://diddygame.infinityfree.me/
+
+https://diddygame.22web.org/
+
+https://diddygame.2kool4u.net/
+
+https://diddygame.66ghz.com/
+
+https://diddygame.a0001.net/
+
+https://diddygame.fanclub.rocks/
+
+https://diddygame.fast-page.org/
+
+https://diddygame.html-5.me/
+
+
 # Extension
 
 [![extention](https://static.chrome-stats.com/icons/chrome-web-store.webp)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
