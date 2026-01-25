@@ -22,7 +22,7 @@ https://diddygame.web1337.net/
 
 https://diddygame.gamer.gd/
 
-https://www.diddygame.infinityfreeapp.com
+https://diddygame.infinityfreeapp.com
 
 https://diddygame.wuaze.com/
 
