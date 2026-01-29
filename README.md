@@ -58,7 +58,33 @@ https://diddygame.fast-page.org/
 
 https://diddygame.html-5.me/
 
+https://diddygame.iblogger.org/
 
+https://diddygame.is-best.net/
+
+https://diddygame.is-great.net/
+
+https://diddygame.is-great.org/
+
+https://diddygame.likesyou.org/
+
+https://diddygame.loveslife.biz/
+
+https://diddygame.my-board.org/
+
+https://diddygame.my-style.in/
+
+https://diddygame.mydiscussion.net/
+
+https://diddygame.nichesite.org/
+
+https://diddygame.social-networking.me/
+
+https://diddygame.synergize.co
+
+https://diddygame.talk4fun.net/
+
+https://diddygame.totalh.net/
 # Extension
 
 [![extention](https://static.chrome-stats.com/icons/chrome-web-store.webp)](https://chromewebstore.google.com/detail/diddy-game/bfjbmoglpfpbkaneffbihgnogdibgfpf) <- Click this to download the extention
